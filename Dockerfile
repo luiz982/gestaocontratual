@@ -1,27 +1,16 @@
-# Etapa 1: Construção
-FROM ubuntu:22.04 AS build
+FROM ubuntu:latest AS build
 
-# Instalar Java 22, Maven e outras dependências necessárias
-RUN apt-get update && \
-    apt-get install -y openjdk-22-jdk maven
-
-# Defina o diretório de trabalho
-WORKDIR /app
-
-# Copiar o código-fonte do projeto para o contêiner
+RUN apt-get update
+RUN apt-get install openjdk-17-jdk -y
 COPY . .
 
-# Rodar o Maven para construir o projeto
-RUN mvn clean install
+RUN apt-get install maven -y
+RUN mvn clean install 
 
-# Etapa 2: Execução
-FROM openjdk:22-jdk-slim
+FROM openjdk:17-jdk-slim
 
-# Expor a porta onde a aplicação vai rodar
 EXPOSE 8080
 
-# Copiar o JAR gerado na etapa de construção para o contêiner
-COPY --from=build /app/target/gestaocontratual-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /target/deploy_render-1.0.0.jar app.jar
 
-# Definir o comando para rodar o aplicativo Spring Boot
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
