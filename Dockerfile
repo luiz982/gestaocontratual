@@ -1,8 +1,9 @@
 # Etapa 1: Construção
-FROM openjdk:17 AS build
+FROM ubuntu:22.04 AS build
 
-# Instalar o Maven
-RUN apt-get update && apt-get install -y maven
+# Instalar Java 22, Maven e outras dependências necessárias
+RUN apt-get update && \
+    apt-get install -y openjdk-22-jdk maven
 
 # Defina o diretório de trabalho
 WORKDIR /app
@@ -14,7 +15,7 @@ COPY . .
 RUN mvn clean install
 
 # Etapa 2: Execução
-FROM openjdk:17-jdk-slim
+FROM openjdk:22-jdk-slim
 
 # Expor a porta onde a aplicação vai rodar
 EXPOSE 8080
