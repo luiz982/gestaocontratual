@@ -1,4 +1,4 @@
-FROM maven:4.0.0-openjdk-22 AS build
+FROM maven:3.8.6-openjdk-17 AS build
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
-FROM openjdk:22-jdk-slim
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
