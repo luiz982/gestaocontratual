@@ -14,9 +14,6 @@ import java.util.stream.Collectors;
 public class GestaocontratualApplication {
 
 	public static void main(String[] args) {
-
-		System.setProperty("DATABASE_USERNAME", "avnadmin");
-		System.setProperty("DATABASE_PASSWORD", "AVNS_D88x-Hhe-fe59uzdu5n");
 		SpringApplication.run(GestaocontratualApplication.class, args);
 	}
 
