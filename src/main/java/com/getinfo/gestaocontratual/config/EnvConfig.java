@@ -1,19 +1,15 @@
 package com.getinfo.gestaocontratual.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-@Component
+@Configuration
 public class EnvConfig {
 
-    @Value("${DATABASE_USERNAME}")
-    private String databaseUsername;
-
-    @Value("${DATABASE_PASSWORD}")
-    private String databasePassword;
-
-    public void printDatabaseConfig() {
-        System.out.println("Database Username: " + databaseUsername);
-        System.out.println("Database Password: " + databasePassword);
+    public EnvConfig() {
+        System.setProperty("DATABASE_USERNAME", "avnadmin");
+        System.setProperty("DATABASE_PASSWORD", "AVNS_D88x-Hhe-fe59uzdu5n");
     }
 }
