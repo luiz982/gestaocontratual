@@ -27,12 +27,23 @@ public class AdminUsuarioConfig  implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception{
         var roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
+        var roleBasic = roleRepository.findByName(Role.Values.BASIC.name());
 
         var userAdmin = usuarioRepository.findByUsuario("admin");
 
 
         if (roleAdmin == null) {
-            throw new IllegalStateException("Role ADMIN não encontrada!");
+            Role role = new Role();
+            role.setRoleID(1L);
+            role.setName(Role.Values.ADMIN.getName());
+            roleRepository.save(role);
+        }
+
+        if (roleBasic == null) {
+            Role role2 = new Role();
+            role2.setRoleID(2L);
+            role2.setName(Role.Values.BASIC.getName());
+            roleRepository.save(role2);
         }
 
         userAdmin.ifPresentOrElse(

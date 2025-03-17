@@ -56,7 +56,7 @@ public class UsuarioController {
         }
 
         var now = Instant.now();
-        var expiresIn = 3600L;
+        var expiresIn = 9600L;
 
         var scopes = usuario.get().getRoles()
                 .stream()
