@@ -8,7 +8,7 @@ public class TipoContrato {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id_tipo")
-    private Integer idTipo;
+    private Long idTipo;
 
     @Column
     private String nome;

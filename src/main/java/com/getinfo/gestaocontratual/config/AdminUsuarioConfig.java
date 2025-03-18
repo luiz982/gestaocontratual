@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Configuration
@@ -25,39 +26,35 @@ public class AdminUsuarioConfig  implements CommandLineRunner {
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception{
-        var roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
-        var roleBasic = roleRepository.findByName(Role.Values.BASIC.name());
+    public void run(String... args) {
 
-        var userAdmin = usuarioRepository.findByUsuario("admin");
-
-
+        Role roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
         if (roleAdmin == null) {
-            Role role = new Role();
-            role.setRoleID(1L);
-            role.setName(Role.Values.ADMIN.getName());
-            roleRepository.save(role);
+            roleAdmin = new Role();
+            roleAdmin.setRoleID(1L);
+            roleAdmin.setName(Role.Values.ADMIN.name());
+            roleAdmin = roleRepository.save(roleAdmin);
         }
 
+        Role roleBasic = roleRepository.findByName(Role.Values.BASIC.name());
         if (roleBasic == null) {
-            Role role2 = new Role();
-            role2.setRoleID(2L);
-            role2.setName(Role.Values.BASIC.getName());
-            roleRepository.save(role2);
+            roleBasic = new Role();
+            roleBasic.setRoleID(2L);
+            roleBasic.setName(Role.Values.BASIC.name());
+            roleBasic = roleRepository.save(roleBasic);
         }
 
-        userAdmin.ifPresentOrElse(
-                usuario -> {
-                 System.out.println("admin existe");
-                },
-                ()-> {
-                    var usuario = new Usuario();
-                    usuario.setUsuario("admin");
-                    usuario.setSenha(passwordEncoder.encode("admin"));
-                    usuario.setRoles(Set.of(roleAdmin));
-                    usuarioRepository.save(usuario);
-                }
+        Optional<Usuario> userAdmin = usuarioRepository.findByUsuario("admin");
 
-        );
+        if (userAdmin.isEmpty()) {
+            Usuario usuario = new Usuario();
+            usuario.setUsuario("admin");
+            usuario.setSenha(passwordEncoder.encode("admin"));
+            usuario.setRoles(Set.of(roleAdmin));
+            usuarioRepository.save(usuario);
+            System.out.println("Usuário admin criado com sucesso!");
+        } else {
+            System.out.println("Usuário admin já existe.");
+        }
     }
 }

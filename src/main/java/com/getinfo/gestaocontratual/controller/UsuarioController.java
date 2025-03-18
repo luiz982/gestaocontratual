@@ -80,7 +80,7 @@ public class UsuarioController {
     @Transactional
     @PostMapping("/createUsuario")
     public ResponseEntity<String> createUsuario(@RequestBody CreateUsuarioRequest dto){
-        var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
+        var basicRole = roleRepository.findByName(Role.Values.ADMIN.name());
 
         var userFromDb = usuarioRepository.findByUsuario(dto.usuario());
 
