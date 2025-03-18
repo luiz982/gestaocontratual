@@ -37,14 +37,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/createUsuario").permitAll()
-                .anyRequest().authenticated()
-        )
+//        http.authorizeHttpRequests(auth -> auth
+//                .requestMatchers("/login",
+//                        "/v3/api-docs/**",
+//                        "/swagger-ui/**",
+//                        "/swagger-ui.html",
+//                        "/createUsuario").permitAll()
+//                .anyRequest().authenticated()
+//        ) Filtra os endpoints
+       http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // Permite tudo
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

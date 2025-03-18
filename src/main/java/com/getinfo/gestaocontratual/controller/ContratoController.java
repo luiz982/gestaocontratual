@@ -4,14 +4,19 @@ import com.getinfo.gestaocontratual.controller.dto.CreateContratoRequest;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
 import com.getinfo.gestaocontratual.utils.Validadores;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Set;
 import java.util.Base64;
 
@@ -51,7 +56,17 @@ public class ContratoController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Erro: O documento excede o limite de 5MB.");
             }
-            documentoBytes = Base64.getDecoder().decode(dto.documento());
+            try {
+                documentoBytes = Base64.getDecoder().decode(dto.documento());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Erro: O documento enviado não é um Base64 válido.");
+            }
+        }
+
+        if (!Validadores.isBase64Valido(dto.documento())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Erro: Tipo de documento não permitido.");
         }
 
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
@@ -59,18 +74,12 @@ public class ContratoController {
                     .body("Erro: A data de início não pode ser vazia.");
         }
 
-        if (dto.cnpj() == null || dto.cnpj().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: O CNPJ não pode ser vazio.");
-        }
-
-        if (!Validadores.isCnpjValido(dto.cnpj())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: CNPJ inválido ou não existe!");
-        }
+//        if (!Validadores.isCnpjValido(dto.cnpj())) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body("Erro: CNPJ inválido ou não existe!");
+//        }
 
         Contrato contrato = new Contrato();
-        contrato.setCnpj(dto.cnpj());
         contrato.setNumContrato(dto.numContrato());
         contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
@@ -83,6 +92,14 @@ public class ContratoController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Contrato registrado com sucesso! Id do contrato: " + contrato.getIdContrato());
+    }
+
+    @GetMapping("/contratos")
+    public ResponseEntity<List<Contrato>> contratos(){
+        var contratos = contratoRepository.findAll();
+
+        return ResponseEntity.ok(contratos);
+
     }
 
 }

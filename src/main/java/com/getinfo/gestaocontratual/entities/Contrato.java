@@ -27,9 +27,6 @@ public class Contrato {
     @Temporal(TemporalType.DATE)
     private Date dtAlteracao;
 
-    @Column(nullable = false)
-    private String cnpj;
-
     @Lob
     @Column
     private byte[] documento;
@@ -82,13 +79,6 @@ public class Contrato {
         this.dtAlteracao = dtAlteracao;
     }
 
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
 
     public byte[] getDocumento() {
         return documento;
