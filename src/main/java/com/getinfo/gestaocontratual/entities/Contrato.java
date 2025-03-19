@@ -39,6 +39,10 @@ public class Contrato {
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
     private Contratante idContratante;
 
+    @ManyToOne
+    @JoinColumn(name = "id_status", referencedColumnName = "id_status")
+    private Status status;
+
     public Long getIdContrato() {
         return idContrato;
     }
@@ -103,4 +107,8 @@ public class Contrato {
     public void setIdContratante(Contratante idContratante) {
         this.idContratante = idContratante;
     }
+
+    public Status getStatus() { return status; }
+
+    public void setStatus(Status status) { this.status = status; }
 }
