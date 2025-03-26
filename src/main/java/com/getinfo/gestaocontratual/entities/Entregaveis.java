@@ -23,7 +23,7 @@ public class Entregaveis {
     @Column(name = "Dt_Inicio")
     private Date dtInicio;
 
-    @Column(name = "Dt_Fim")
+    @Column(name = "Dt_Fim", nullable = true)
     private Date dtFim;
 
     @Column(name = "Status")
