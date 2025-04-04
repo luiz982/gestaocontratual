@@ -1,5 +1,4 @@
 package com.getinfo.gestaocontratual.utils;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -39,6 +38,7 @@ public class Validadores {
         }
         return false;
     }
+
 
     public static boolean validarData(String data, String formato) {
         SimpleDateFormat sdf = new SimpleDateFormat(formato);
