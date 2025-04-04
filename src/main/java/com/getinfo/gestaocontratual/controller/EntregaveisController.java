@@ -3,13 +3,9 @@ package com.getinfo.gestaocontratual.controller;
 import com.getinfo.gestaocontratual.controller.dto.CreateEntregaveisRequest;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
-import com.getinfo.gestaocontratual.utils.Validadores;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,15 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @RestController
 public class EntregaveisController {
 
     private final EntregaveisRepository EntregaveisRepository;
+    private final ContratoRepository contratoRepository;
 
-    public EntregaveisController(EntregaveisRepository entregaveisRepository) {
+    public EntregaveisController(EntregaveisRepository entregaveisRepository, ContratoRepository contratoRepository) {
         this.EntregaveisRepository = entregaveisRepository;
+        this.contratoRepository = contratoRepository;
     }
 
     @GetMapping("/entregaveis")
@@ -61,16 +59,15 @@ public class EntregaveisController {
                     .body("Erro: Data de Inicio maior que a Data de Fim!");
         }
 
-        //Verificar formato da data
+        Optional<Contrato> contratoOptional = contratoRepository.findById(dto.idContrato());
 
-        // if (!Validadores.validarData(dto.dtInicio().toString(), "yyyy-MM-dd")) {
-        //     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        //             .body("Erro: Data de Inicio inválida!");
-        // }
+        if (contratoOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
+        }
 
         Entregaveis entregaveis = new Entregaveis();
 
-        entregaveis.setIdContrato(dto.idContrato());
+        entregaveis.setIdContrato(contratoOptional.orElse(null));
         entregaveis.setNome(dto.nome());
         entregaveis.setDtInicio(dto.dtInicio());
         entregaveis.setDtFim(dto.dtFim());
