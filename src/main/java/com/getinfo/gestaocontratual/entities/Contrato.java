@@ -27,10 +27,6 @@ public class Contrato {
     @Temporal(TemporalType.DATE)
     private Date dtAlteracao;
 
-    @Lob
-    @Column
-    private byte[] documento;
-
     @ManyToOne
     @JoinColumn(name = "id_tipo", referencedColumnName = "id_tipo", nullable = false)
     private TipoContrato idTipo;
@@ -81,15 +77,6 @@ public class Contrato {
 
     public void setDtAlteracao(Date dtAlteracao) {
         this.dtAlteracao = dtAlteracao;
-    }
-
-
-    public byte[] getDocumento() {
-        return documento;
-    }
-
-    public void setDocumento(byte[] documento) {
-        this.documento = documento;
     }
 
     public TipoContrato getIdTipo() {

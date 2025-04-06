@@ -48,27 +48,6 @@ public class ContratoController {
                     .body("Erro: Contratante não encontrado!");
         }
 
-        int MAX_FILE_SIZE = 5 * 1024 * 1024;
-        int MAX_BASE64_LENGTH = (int) Math.ceil(MAX_FILE_SIZE * 1.37);
-        byte[] documentoBytes = null;
-
-        if (dto.documento() != null && !dto.documento().isBlank()) {
-            if (dto.documento().length() > MAX_BASE64_LENGTH) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: O documento excede o limite de 5MB.");
-            }
-            try {
-                documentoBytes = Base64.getDecoder().decode(dto.documento());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: O documento enviado não é um Base64 válido.");
-            }
-        }
-
-        if (!Validadores.isBase64Valido(dto.documento())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Tipo de documento não permitido.");
-        }
 
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -85,7 +64,6 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setIdTipo(tipoContrato);
-        contrato.setDocumento(documentoBytes);
 
         contratoRepository.save(contrato);
 
@@ -134,28 +112,6 @@ public class ContratoController {
                     .body("Erro: Contratante não encontrado!");
         }
 
-        int MAX_FILE_SIZE = 5 * 1024 * 1024;
-        int MAX_BASE64_LENGTH = (int) Math.ceil(MAX_FILE_SIZE * 1.37);
-        byte[] documentoBytes = null;
-
-        if (dto.documento() != null && !dto.documento().isBlank()) {
-            if (dto.documento().length() > MAX_BASE64_LENGTH) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: O documento excede o limite de 5MB.");
-            }
-            try {
-                documentoBytes = Base64.getDecoder().decode(dto.documento());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: O documento enviado não é um Base64 válido.");
-            }
-        }
-
-        if (!Validadores.isBase64Valido(dto.documento())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Tipo de documento não permitido.");
-        }
-
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro: A data de início não pode ser vazia.");
@@ -170,7 +126,6 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setIdTipo(tipoContrato);
-        contrato.setDocumento(documentoBytes);
 
         contratoRepository.save(contrato);
 

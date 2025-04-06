@@ -79,7 +79,7 @@ public class EntregaveisController {
         return ResponseEntity.ok(msg);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("entregaveis/{id}")
     @Transactional
     public ResponseEntity<String> DeletarEntregaveis(@PathVariable("id") Long idEntregavel)
     {

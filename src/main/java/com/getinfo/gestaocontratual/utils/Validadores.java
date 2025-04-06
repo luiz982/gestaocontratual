@@ -1,5 +1,6 @@
 package com.getinfo.gestaocontratual.utils;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 
 import br.com.caelum.stella.validation.CNPJValidator;
@@ -22,21 +23,12 @@ public class Validadores {
     }
 
     public static boolean isBase64Valido(String base64) {
-        if (base64.startsWith("data:")) {
-            String mimeType = base64.split(";")[0].split(":")[1];
-
-            switch (mimeType) {
-                case "application/msword":
-                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                case "image/png":
-                case "image/jpeg": // JPG
-                case "application/pdf":
-                    return true;
-                default:
-                    return false;
-            }
+        try {
+            Base64.getDecoder().decode(base64);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
-        return false;
     }
 
 
