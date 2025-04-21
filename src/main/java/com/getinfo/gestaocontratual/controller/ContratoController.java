@@ -23,24 +23,23 @@ import java.util.Base64;
 public class ContratoController {
     private final ContratoRepository contratoRepository;
     private final ContratanteRepository contratanteRepository;
-    private final TipoContratoRepository tipoContratoRepository;
     private final StatusRepository statusRepository;
+    private final DocumentoRepository documentoRepository;
+    private final PostoTrabalhoRepository postoTrabalhoRepository;
+    private final EntregaveisRepository entregaveisRepository;
 
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, TipoContratoRepository tipoContratoRepository, StatusRepository statusRepository) {
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
-        this.tipoContratoRepository = tipoContratoRepository;
         this.statusRepository = statusRepository;
+        this.documentoRepository = documentoRepository;
+        this.postoTrabalhoRepository = postoTrabalhoRepository;
+        this.entregaveisRepository = entregaveisRepository;
     }
     @Operation(summary = "Cadastro de contrato")
     @Transactional
     @PostMapping("/criarContrato")
     public ResponseEntity<String> criarContrato(@RequestBody CreateContratoRequest dto) {
-        TipoContrato tipoContrato = tipoContratoRepository.findById(dto.idTipo()).orElse(null);
-        if (tipoContrato == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Tipo de Contrato não encontrado!");
-        }
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
@@ -63,12 +62,83 @@ public class ContratoController {
         contrato.setDtAlteracao(dto.dtAlteracao());
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
-        contrato.setIdTipo(tipoContrato);
+        contrato.setTipoContrato(dto.tipoContrato());
 
-        contratoRepository.save(contrato);
+        contrato = contratoRepository.save(contrato);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Contrato registrado com sucesso! Id do contrato: " + contrato.getIdContrato());
+
+        if (dto.entregaveis() != null) {
+            for (var e : dto.entregaveis()) {
+                if (e.nome() == null || e.nome().isBlank()) {
+                    return ResponseEntity.badRequest().body("Erro: Nome do entregável é obrigatório.");
+                }
+
+                if (e.dtInicio() == null) {
+                    return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
+                }
+
+                try {
+                    Entregaveis entregavel = new Entregaveis();
+                    entregavel.setIdContrato(contrato);
+                    entregavel.setNome(e.nome());
+                    entregavel.setDtInicio(e.dtInicio());
+                    entregavel.setDtFim(e.dtFim());
+
+                    entregaveisRepository.save(entregavel);
+                } catch (Exception ex) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao salvar entregável: " + ex.getMessage());
+                }
+            }
+        }
+
+
+
+        if (dto.postos() != null) {
+            for (var p : dto.postos()) {
+                if (p.nome() == null || p.nome().isBlank()) {
+                    return ResponseEntity.badRequest().body("Erro: Nome do posto de trabalho é obrigatório.");
+                }
+
+                try {
+                    PostoTrabalho posto = new PostoTrabalho();
+                    posto.setIdContrato(contrato);
+                    posto.setNome(p.nome());
+                    posto.setDescricao(p.descricao());
+                    postoTrabalhoRepository.save(posto);
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao salvar posto de trabalho: " + e.getMessage());
+                }
+            }
+        }
+
+
+        if (dto.documentos() != null) {
+            for (var doc : dto.documentos()) {
+                int MAX_SIZE = 5 * 1024 * 1024;
+                if (doc.conteudoBase64().length() > (int) Math.ceil(MAX_SIZE * 1.37)) {
+                    return ResponseEntity.badRequest().body("Documento excede o limite de 5MB.");
+                }
+
+                if (!Validadores.isBase64Valido(doc.conteudoBase64())) {
+                    return ResponseEntity.badRequest().body("Tipo de documento inválido.");
+                }
+
+                try {
+                    byte[] conteudo = Base64.getDecoder().decode(doc.conteudoBase64());
+                    Documentos documento = new Documentos();
+                    documento.setContrato(contrato);
+                    documento.setNome(doc.nome());
+                    documento.setConteudo(conteudo);
+                    documentoRepository.save(documento);
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.badRequest().body("Documento base64 inválido.");
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Contrato cadastrado com sucesso. ID:"+ contrato.getIdContrato());
     }
 
     @Operation(summary = "Retorna todos os contratos cadastrados")
@@ -76,6 +146,22 @@ public class ContratoController {
     public ResponseEntity<List<Contrato>> contratos(){
         var contratos = contratoRepository.findAll();
 
+        return ResponseEntity.ok(contratos);
+
+    }
+
+    @Operation(summary = "Retorna todos os contratos arquivados")
+    @GetMapping("/listarArquivados")
+    public ResponseEntity<List<Contrato>> contratosArquivados(){
+        var contratos = contratoRepository.findByStatus_NomeIgnoreCase("arquivado");
+        return ResponseEntity.ok(contratos);
+
+    }
+
+    @Operation(summary = "Retorna todos os contratos ativos")
+    @GetMapping("/listarAtivos")
+    public ResponseEntity<List<Contrato>> contratosAtivos(){
+        var contratos = contratoRepository.findAllAtivos();
         return ResponseEntity.ok(contratos);
 
     }
@@ -100,11 +186,6 @@ public class ContratoController {
         }
 
         Contrato contrato = contratoOptional.get();
-        TipoContrato tipoContrato = tipoContratoRepository.findById(dto.idTipo()).orElse(null);
-        if (tipoContrato == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Tipo de Contrato não encontrado!");
-        }
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
@@ -125,23 +206,108 @@ public class ContratoController {
         contrato.setDtAlteracao(dto.dtAlteracao());
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
-        contrato.setIdTipo(tipoContrato);
+        contrato.setTipoContrato(dto.tipoContrato());
 
-        contratoRepository.save(contrato);
+        contrato = contratoRepository.save(contrato);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Contrato atualizado com sucesso! Id do contrato: " + contrato.getIdContrato());
+        if (id != null) entregaveisRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
+
+        if (dto.entregaveis() != null) {
+            for (var e : dto.entregaveis()) {
+                if (e.nome() == null || e.nome().isBlank()) {
+                    return ResponseEntity.badRequest().body("Erro: Nome do entregável é obrigatório.");
+                }
+
+                if (e.dtInicio() == null) {
+                    return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
+                }
+
+                try {
+                    Entregaveis entregavel = new Entregaveis();
+                    entregavel.setIdContrato(contrato);
+                    entregavel.setNome(e.nome());
+                    entregavel.setDtInicio(e.dtInicio());
+                    entregavel.setDtFim(e.dtFim());
+
+                    entregaveisRepository.save(entregavel);
+                } catch (Exception ex) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao salvar entregável: " + ex.getMessage());
+                }
+            }
+        }
+
+
+        if (id != null) postoTrabalhoRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
+
+        if (dto.postos() != null) {
+            for (var p : dto.postos()) {
+                if (p.nome() == null || p.nome().isBlank()) {
+                    return ResponseEntity.badRequest().body("Erro: Nome do posto de trabalho é obrigatório.");
+                }
+
+                try {
+                    PostoTrabalho posto = new PostoTrabalho();
+                    posto.setIdContrato(contrato);
+                    posto.setNome(p.nome());
+                    posto.setDescricao(p.descricao());
+                    postoTrabalhoRepository.save(posto);
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao salvar posto de trabalho: " + e.getMessage());
+                }
+            }
+        }
+
+        if (id != null) documentoRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
+
+        if (dto.documentos() != null) {
+            for (var doc : dto.documentos()) {
+                int MAX_SIZE = 5 * 1024 * 1024;
+                if (doc.conteudoBase64().length() > (int) Math.ceil(MAX_SIZE * 1.37)) {
+                    return ResponseEntity.badRequest().body("Documento excede o limite de 5MB.");
+                }
+
+                if (!Validadores.isBase64Valido(doc.conteudoBase64())) {
+                    return ResponseEntity.badRequest().body("Tipo de documento inválido.");
+                }
+
+                try {
+                    byte[] conteudo = Base64.getDecoder().decode(doc.conteudoBase64());
+                    Documentos documento = new Documentos();
+                    documento.setContrato(contrato);
+                    documento.setNome(doc.nome());
+                    documento.setConteudo(conteudo);
+                    documentoRepository.save(documento);
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.badRequest().body("Documento base64 inválido.");
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Contrato atualizado com sucesso. ID:"+ contrato.getIdContrato());
     }
 
     @Operation(summary = "Deleta um contrato")
     @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletarContrato(@PathVariable Long id) {
-        if (!contratoRepository.existsById(id)) {
+        Optional<Contrato> contratoOpt = contratoRepository.findById(id);
+        if (contratoOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
         }
-        contratoRepository.deleteById(id);
-        return ResponseEntity.ok("Contrato deletado com sucesso");
+
+        try {
+            documentoRepository.deleteAllByIdContrato_IdContrato(id);
+            entregaveisRepository.deleteAllByIdContrato_IdContrato(id);
+            postoTrabalhoRepository.deleteAllByIdContrato_IdContrato(id);
+            contratoRepository.deleteById(id);
+
+            return ResponseEntity.ok("Contrato deletado com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao deletar contrato: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Atualiza apenas o status do contrato")
@@ -163,6 +329,56 @@ public class ContratoController {
         contratoRepository.save(contrato);
 
         return ResponseEntity.ok("Status do contrato atualizado para: " + novoStatus.getNome());
+    }
+
+    @Operation(summary = "Arquiva o contrato (status: Arquivado)")
+    @PatchMapping("/{id}/arquivar")
+    @Transactional
+    public ResponseEntity<?> arquivarContrato(@PathVariable Long id) {
+        Optional<Contrato> contratoOpt = contratoRepository.findById(id);
+        if (contratoOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado.");
+        }
+
+        Status statusArquivado = statusRepository.findByNomeIgnoreCase("Arquivado");
+
+        if (statusArquivado == null) {
+            statusArquivado = new Status();
+            statusArquivado.setNome("Arquivado");
+            statusArquivado.setDescricao("Contrato arquivado");
+            statusRepository.save(statusArquivado);
+        }
+
+        Contrato contrato = contratoOpt.get();
+        contrato.setStatus(statusArquivado);
+        contratoRepository.save(contrato);
+
+        return ResponseEntity.ok("Contrato arquivado com sucesso.");
+    }
+
+    @Operation(summary = "Desarquviar o contrato (status: Ativo)")
+    @PatchMapping("/{id}/desarquivar")
+    @Transactional
+    public ResponseEntity<?> desarquivarContrato(@PathVariable Long id) {
+        Optional<Contrato> contratoOpt = contratoRepository.findById(id);
+        if (contratoOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado.");
+        }
+
+        Status statusAtivo = statusRepository.findByNomeIgnoreCase("Ativo");
+
+        if (statusAtivo == null) {
+            statusAtivo = new Status();
+            statusAtivo.setNome("Ativo");
+            statusAtivo.setDescricao("Contrato ativo");
+            statusRepository.save(statusAtivo);
+        }
+
+        Contrato contrato = contratoOpt.get();
+        contrato.setStatus(statusAtivo);
+        contratoRepository.save(contrato);
+
+        return ResponseEntity.ok("Contrato desarquivado com sucesso.");
     }
 
 }

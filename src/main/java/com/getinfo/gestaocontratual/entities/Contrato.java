@@ -27,9 +27,8 @@ public class Contrato {
     @Temporal(TemporalType.DATE)
     private Date dtAlteracao;
 
-    @ManyToOne
-    @JoinColumn(name = "id_tipo", referencedColumnName = "id_tipo", nullable = false)
-    private TipoContrato idTipo;
+    @Column(nullable = false)
+    private String tipoContrato;
 
     @ManyToOne
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
@@ -79,14 +78,6 @@ public class Contrato {
         this.dtAlteracao = dtAlteracao;
     }
 
-    public TipoContrato getIdTipo() {
-        return idTipo;
-    }
-
-    public void setIdTipo(TipoContrato idTipo) {
-        this.idTipo = idTipo;
-    }
-
     public Contratante getIdContratante() {
         return idContratante;
     }
@@ -98,4 +89,12 @@ public class Contrato {
     public Status getStatus() { return status; }
 
     public void setStatus(Status status) { this.status = status; }
+
+    public String getTipoContrato() {
+        return tipoContrato;
+    }
+
+    public void setTipoContrato(String tipoContrato) {
+        this.tipoContrato = tipoContrato;
+    }
 }

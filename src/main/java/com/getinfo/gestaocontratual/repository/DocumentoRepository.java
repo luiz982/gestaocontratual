@@ -12,4 +12,6 @@ import java.util.List;
 public interface DocumentoRepository extends JpaRepository<Documentos, Long> {
     @Query("SELECT d FROM Documentos d WHERE d.idContrato.idContrato = :idContrato")
     List<Documentos> findByContratoId(@Param("idContrato") Long idContrato);
+
+    void deleteAllByIdContrato_IdContrato(Long idContrato);
 }

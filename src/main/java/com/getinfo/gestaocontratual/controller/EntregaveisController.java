@@ -3,6 +3,7 @@ package com.getinfo.gestaocontratual.controller;
 import com.getinfo.gestaocontratual.controller.dto.CreateEntregaveisRequest;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,19 @@ public class EntregaveisController {
 
         return ResponseEntity.ok(Entregaveis);
 
+    }
+
+    @Operation(summary = "Retorna todos os entregáveis de um contrato")
+    @GetMapping("/entregaveis/contrato/{idContrato}")
+    public ResponseEntity<?> entregaveisPorContrato(@PathVariable Long idContrato) {
+        List<Entregaveis> lista = EntregaveisRepository.findByIdContrato_IdContrato(idContrato);
+
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Nenhum entregável encontrado para este contrato.");
+        }
+
+        return ResponseEntity.ok(lista);
     }
 
     @PostMapping("/criarEntregaveis")

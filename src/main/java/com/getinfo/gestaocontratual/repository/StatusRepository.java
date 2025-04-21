@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface StatusRepository  extends JpaRepository<Status, Long> {
     Optional<Status> findById (Long idStatus);
+
+    Status findByNomeIgnoreCase(String arquivado);
 }
