@@ -42,4 +42,14 @@ public class Validadores {
             return false; 
         }
     }
+
+    public static boolean ValidarCEP(String cep) {
+        if (cep == null || cep.isBlank()) {
+            return false;
+        }
+
+        String regex = "^[0-9]{5}-?[0-9]{3}$";
+        return cep.matches(regex);
+    }
+
 }

@@ -26,13 +26,13 @@ public class UtilController {
         try {
             String url = "http://servicodados.ibge.gov.br/api/v1/localidades/estados";
             String response = restTemplate.getForObject(url, String.class);
-            List<Map<String, Object>> estados = objectMapper.readValue(response, new TypeReference<>() {});
+            List<Map<String, Object>> estados = objectMapper.readValue(response, new TypeReference<>() {
+            });
 
             List<Map<String, Object>> estadosFiltrados = estados.stream()
                     .map(estado -> Map.of(
                             "id", estado.get("id"),
-                            "nome", estado.get("nome")
-                    ))
+                            "nome", estado.get("nome")))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(new UtilResponse("Dados recuperados com sucesso", estadosFiltrados));
@@ -48,13 +48,13 @@ public class UtilController {
         try {
             String url = "http://servicodados.ibge.gov.br/api/v1/localidades/estados/" + idEstado + "/municipios";
             String response = restTemplate.getForObject(url, String.class);
-            List<Map<String, Object>> municipios = objectMapper.readValue(response, new TypeReference<>() {});
+            List<Map<String, Object>> municipios = objectMapper.readValue(response, new TypeReference<>() {
+            });
 
             List<Map<String, Object>> municipiosFiltrados = municipios.stream()
                     .map(municipio -> Map.of(
                             "id", municipio.get("id"),
-                            "nome", municipio.get("nome")
-                    ))
+                            "nome", municipio.get("nome")))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(new UtilResponse("Dados recuperados com sucesso", municipiosFiltrados));
@@ -74,7 +74,8 @@ public class UtilController {
         try {
             String url = "https://publica.cnpj.ws/cnpj/" + cnpj;
             String response = restTemplate.getForObject(url, String.class);
-            Map<String, Object> cnpjData = objectMapper.readValue(response, new TypeReference<>() {});
+            Map<String, Object> cnpjData = objectMapper.readValue(response, new TypeReference<>() {
+            });
 
             Map<String, Object> estabelecimento = (Map<String, Object>) cnpjData.get("estabelecimento");
             Map<String, Object> estado = (Map<String, Object>) estabelecimento.get("estado");
@@ -88,13 +89,63 @@ public class UtilController {
                     "data_inicio_atividade", estabelecimento.get("data_inicio_atividade"),
                     "atividade_principal", estabelecimento.get("atividade_principal"),
                     "estado", estado,
-                    "cidade", cidade
-            );
+                    "cidade", cidade);
 
             return ResponseEntity.ok(new UtilResponse("Dados recuperados com sucesso", empresaFiltrada));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new UtilResponse("Erro ao buscar informações do CNPJ", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "Retorna as informações de um CEP. Também retorna se ele é válido ou não.")
+    @GetMapping("/cep/{cep}")
+    public ResponseEntity<?> getCepInfo(@PathVariable String cep) {
+        if (!Validadores.ValidarCEP(cep)) {
+            return ResponseEntity.badRequest().body(new UtilResponse("CEP inválido", null));
+        }
+
+        try {
+            String url = "https://viacep.com.br/ws/" + cep + "/json/";
+            String response = restTemplate.getForObject(url, String.class);
+            Map<String, Object> cepData = objectMapper.readValue(response, new TypeReference<>() {
+            });
+
+            // Caso nao tenha o CEP no VIACEP, tenta a API da Republica Virtual
+            if (cepData.containsKey("erro")) {
+                // return ResponseEntity.badRequest().body(new UtilResponse("ERRO - CEP não encontrado", null));
+
+                url = "http://cep.republicavirtual.com.br/web_cep.php?" + cep + "&formato=json";
+                response = restTemplate.getForObject(url, String.class);
+                cepData = objectMapper.readValue(response, new TypeReference<>() {
+                });
+
+                if (cepData.containsKey("resultado") && "0".equals(cepData.get("resultado"))) {
+                    return ResponseEntity.badRequest().body(new UtilResponse("ERRO - CEP não encontrado", null));
+                } else {
+                    Map<String, Object> cepFiltrado = Map.of(
+                            "cep", cep,
+                            "logradouro",
+                            cepData.get("tipo_logradouro").toString() + cepData.get("logradouro").toString(),
+                            "bairro", cepData.get("bairro"),
+                            "localidade", cepData.get("cidade"),
+                            "uf", cepData.get("uf"));
+
+                    return ResponseEntity.ok(new UtilResponse("OK", cepFiltrado));
+                }
+            }
+
+            Map<String, Object> cepFiltrado = Map.of(
+                    "cep", cepData.get("cep"),
+                    "logradouro", cepData.get("logradouro"),
+                    "bairro", cepData.get("bairro"),
+                    "localidade", cepData.get("localidade"),
+                    "uf", cepData.get("uf"));
+
+            return ResponseEntity.ok(new UtilResponse("OK", cepFiltrado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new UtilResponse("Erro ao buscar informações do CEP", e.getMessage()));
         }
     }
 }
