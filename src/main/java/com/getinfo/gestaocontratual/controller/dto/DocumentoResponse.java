@@ -1,4 +1,4 @@
 package com.getinfo.gestaocontratual.controller.dto;
 
-public record DocumentoResponse(String nome, String documentoBase64) {
+public record DocumentoResponse(Long idDocumento, String nome, String url) {
 }

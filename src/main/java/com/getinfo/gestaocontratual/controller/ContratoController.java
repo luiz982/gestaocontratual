@@ -1,7 +1,6 @@
 package com.getinfo.gestaocontratual.controller;
 
-import com.getinfo.gestaocontratual.controller.dto.ContratoResponse;
-import com.getinfo.gestaocontratual.controller.dto.CreateContratoRequest;
+import com.getinfo.gestaocontratual.controller.dto.*;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
 import com.getinfo.gestaocontratual.service.DocumentoService;
@@ -191,12 +190,21 @@ public class ContratoController {
     }
 
     private ContratoResponse getContratoComDetalhes(Contrato contrato) {
-        contrato.getIdContratante();
-        contrato.getStatus();
-
         List<Entregaveis> entregaveis = entregaveisRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<PostoTrabalho> postosTrabalho = postoTrabalhoRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<Documentos> documentos = documentoRepository.findByContratoId(contrato.getIdContrato());
+
+        List<EntregaveisResponse> entregaveisResponseList = entregaveis.stream()
+                .map(e -> new EntregaveisResponse(e.getIdEntregavel(), e.getNome(), e.getDtInicio(), e.getDtFim(), e.isStatus()))
+                .toList();
+
+        List<PostoTrabalhoResponse> postosTrabalhoResponseList = postosTrabalho.stream()
+                .map(p -> new PostoTrabalhoResponse(p.getId(), p.getNome(), p.getDescricao()))
+                .toList();
+
+        List<DocumentoResponse> documentosResponseList = documentos.stream()
+                .map(d -> new DocumentoResponse(d.getIdDocumento(), d.getNome(), d.getUrl()))
+                .toList();
 
         ContratoResponse contratoResponse = new ContratoResponse();
         contratoResponse.setIdContrato(contrato.getIdContrato());
@@ -207,9 +215,9 @@ public class ContratoController {
         contratoResponse.setIdContratante(contrato.getIdContratante() != null ? contrato.getIdContratante().getIdContratante() : null);
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
-        contratoResponse.setEntregaveis(entregaveis);
-        contratoResponse.setPostosTrabalho(postosTrabalho);
-        contratoResponse.setDocumentos(documentos);
+        contratoResponse.setEntregaveis(entregaveisResponseList);
+        contratoResponse.setPostosTrabalho(postosTrabalhoResponseList);
+        contratoResponse.setDocumentos(documentosResponseList);
 
         return contratoResponse;
     }
