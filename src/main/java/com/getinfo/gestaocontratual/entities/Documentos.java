@@ -14,12 +14,11 @@ public class Documentos {
     @JoinColumn(name = "id_contrato", nullable = false, referencedColumnName = "id_contrato")
     private Contrato idContrato;
 
-    @Column(name = "nome", nullable = false, length = 255)
+    @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Lob
-    @Column(name = "conteudo", columnDefinition = "LONGBLOB")
-    private byte[] conteudo;
+    @Column(name = "url", nullable = false)
+    private String url;
 
     public Long getIdDocumento() {
         return idDocumento;
@@ -45,11 +44,11 @@ public class Documentos {
         this.nome = nome;
     }
 
-    public byte[] getConteudo() {
-        return conteudo;
+    public String getUrl() {
+        return url;
     }
 
-    public void setConteudo(byte[] conteudo) {
-        this.conteudo = conteudo;
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

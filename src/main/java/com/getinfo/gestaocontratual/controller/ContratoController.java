@@ -1,22 +1,33 @@
 package com.getinfo.gestaocontratual.controller;
 
+import com.getinfo.gestaocontratual.controller.dto.ContratoResponse;
 import com.getinfo.gestaocontratual.controller.dto.CreateContratoRequest;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
-import com.getinfo.gestaocontratual.utils.Validadores;
+import com.getinfo.gestaocontratual.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.print.attribute.standard.Media;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Base64;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/contratos")
@@ -27,26 +38,30 @@ public class ContratoController {
     private final DocumentoRepository documentoRepository;
     private final PostoTrabalhoRepository postoTrabalhoRepository;
     private final EntregaveisRepository entregaveisRepository;
+    private final DocumentoService documentoService;
 
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository) {
+    @Autowired
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
         this.statusRepository = statusRepository;
         this.documentoRepository = documentoRepository;
         this.postoTrabalhoRepository = postoTrabalhoRepository;
         this.entregaveisRepository = entregaveisRepository;
+        this.documentoService = documentoService;
     }
+
     @Operation(summary = "Cadastro de contrato")
     @Transactional
-    @PostMapping("/criarContrato")
-    public ResponseEntity<String> criarContrato(@RequestBody CreateContratoRequest dto) {
+    @PostMapping(value = "/criarContrato", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> criarContrato(@RequestPart("contrato") CreateContratoRequest dto,
+                                                @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro: Contratante não encontrado!");
         }
-
 
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -65,7 +80,6 @@ public class ContratoController {
         contrato.setTipoContrato(dto.tipoContrato());
 
         contrato = contratoRepository.save(contrato);
-
 
         if (dto.entregaveis() != null) {
             for (var e : dto.entregaveis()) {
@@ -92,8 +106,6 @@ public class ContratoController {
             }
         }
 
-
-
         if (dto.postos() != null) {
             for (var p : dto.postos()) {
                 if (p.nome() == null || p.nome().isBlank()) {
@@ -113,57 +125,58 @@ public class ContratoController {
             }
         }
 
+        if (documentos != null) {
+            for (MultipartFile file : documentos) {
+                if (file != null && !file.isEmpty()) {
+                    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                    try {
+                        documentoService.uploadFile(fileName, file);
+                        String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/" + "documentos/" + fileName;
 
-        if (dto.documentos() != null) {
-            for (var doc : dto.documentos()) {
-                int MAX_SIZE = 5 * 1024 * 1024;
-                if (doc.conteudoBase64().length() > (int) Math.ceil(MAX_SIZE * 1.37)) {
-                    return ResponseEntity.badRequest().body("Documento excede o limite de 5MB.");
-                }
-
-                if (!Validadores.isBase64Valido(doc.conteudoBase64())) {
-                    return ResponseEntity.badRequest().body("Tipo de documento inválido.");
-                }
-
-                try {
-                    byte[] conteudo = Base64.getDecoder().decode(doc.conteudoBase64());
-                    Documentos documento = new Documentos();
-                    documento.setContrato(contrato);
-                    documento.setNome(doc.nome());
-                    documento.setConteudo(conteudo);
-                    documentoRepository.save(documento);
-                } catch (IllegalArgumentException e) {
-                    return ResponseEntity.badRequest().body("Documento base64 inválido.");
+                        Documentos documento = new Documentos();
+                        documento.setContrato(contrato);
+                        documento.setNome(file.getOriginalFilename());
+                        documento.setUrl(fileUrl);
+                        documentoRepository.save(documento);
+                    } catch (IOException e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Erro ao fazer upload do documento para o Supabase Storage: " + e.getMessage());
+                    }
                 }
             }
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Contrato cadastrado com sucesso. ID:"+ contrato.getIdContrato());
+        return ResponseEntity.status(HttpStatus.CREATED).body("Contrato cadastrado com sucesso. ID:" + contrato.getIdContrato());
     }
 
     @Operation(summary = "Retorna todos os contratos cadastrados")
     @GetMapping("/contratos")
-    public ResponseEntity<List<Contrato>> contratos(){
-        var contratos = contratoRepository.findAll();
-
-        return ResponseEntity.ok(contratos);
-
+    public ResponseEntity<List<ContratoResponse>> contratos() {
+        List<Contrato> contratos = contratoRepository.findAll();
+        List<ContratoResponse> contratosComDetalles = contratos.stream()
+                .map(this::getContratoComDetalhes)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(contratosComDetalles);
     }
 
     @Operation(summary = "Retorna todos os contratos arquivados")
     @GetMapping("/listarArquivados")
-    public ResponseEntity<List<Contrato>> contratosArquivados(){
-        var contratos = contratoRepository.findByStatus_NomeIgnoreCase("arquivado");
-        return ResponseEntity.ok(contratos);
-
+    public ResponseEntity<List<ContratoResponse>> contratosArquivados() {
+        List<Contrato> contratos = contratoRepository.findByStatus_NomeIgnoreCase("arquivado");
+        List<ContratoResponse> contratosComDetalles = contratos.stream()
+                .map(this::getContratoComDetalhes)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(contratosComDetalles);
     }
 
     @Operation(summary = "Retorna todos os contratos ativos")
     @GetMapping("/listarAtivos")
-    public ResponseEntity<List<Contrato>> contratosAtivos(){
-        var contratos = contratoRepository.findAllAtivos();
-        return ResponseEntity.ok(contratos);
-
+    public ResponseEntity<List<ContratoResponse>> contratosAtivos() {
+        List<Contrato> contratos = contratoRepository.findAllAtivos();
+        List<ContratoResponse> contratosComDetalles = contratos.stream()
+                .map(this::getContratoComDetalhes)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(contratosComDetalles);
     }
 
     @Operation(summary = "Retorna um contrato pelo ID")
@@ -173,13 +186,40 @@ public class ContratoController {
         if (contrato.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro: Contrato não encontrado!");
         }
-        return ResponseEntity.ok(contrato);
+        ContratoResponse contratoComDetalles = getContratoComDetalhes(contrato.get());
+        return ResponseEntity.ok(contratoComDetalles);
+    }
+
+    private ContratoResponse getContratoComDetalhes(Contrato contrato) {
+        contrato.getIdContratante();
+        contrato.getStatus();
+
+        List<Entregaveis> entregaveis = entregaveisRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
+        List<PostoTrabalho> postosTrabalho = postoTrabalhoRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
+        List<Documentos> documentos = documentoRepository.findByContratoId(contrato.getIdContrato());
+
+        ContratoResponse contratoResponse = new ContratoResponse();
+        contratoResponse.setIdContrato(contrato.getIdContrato());
+        contratoResponse.setNumContrato(contrato.getNumContrato());
+        contratoResponse.setDtInicio(contrato.getDtInicio());
+        contratoResponse.setDtFim(contrato.getDtFim());
+        contratoResponse.setDtAlteracao(contrato.getDtAlteracao());
+        contratoResponse.setIdContratante(contrato.getIdContratante() != null ? contrato.getIdContratante().getIdContratante() : null);
+        contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
+        contratoResponse.setTipoContrato(contrato.getTipoContrato());
+        contratoResponse.setEntregaveis(entregaveis);
+        contratoResponse.setPostosTrabalho(postosTrabalho);
+        contratoResponse.setDocumentos(documentos);
+
+        return contratoResponse;
     }
 
     @Operation(summary = "Atualiza um contrato")
     @Transactional
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarContrato(@PathVariable Long id, @RequestBody CreateContratoRequest dto) {
+    public ResponseEntity<?> atualizarContrato(@PathVariable Long id,
+                                               @RequestPart("contrato") CreateContratoRequest dto,
+                                               @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) { // Use MultipartFile[]
         Optional<Contrato> contratoOptional = contratoRepository.findById(id);
         if (contratoOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
@@ -237,7 +277,6 @@ public class ContratoController {
             }
         }
 
-
         if (id != null) postoTrabalhoRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
 
         if (dto.postos() != null) {
@@ -259,34 +298,36 @@ public class ContratoController {
             }
         }
 
-        if (id != null) documentoRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
+        if (documentos != null) {
+            List<Documentos> documentosExistentes = documentoRepository.findByContratoId(contrato.getIdContrato());
+            for (Documentos doc : documentosExistentes) {
+                documentoService.deleteFile(doc.getUrl().substring(doc.getUrl().lastIndexOf('/') + 1));
+                documentoRepository.deleteById(doc.getIdDocumento());
+            }
 
-        if (dto.documentos() != null) {
-            for (var doc : dto.documentos()) {
-                int MAX_SIZE = 5 * 1024 * 1024;
-                if (doc.conteudoBase64().length() > (int) Math.ceil(MAX_SIZE * 1.37)) {
-                    return ResponseEntity.badRequest().body("Documento excede o limite de 5MB.");
-                }
+            for (MultipartFile file : documentos) {
+                if (file != null && !file.isEmpty()) {
+                    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                    try {
+                        documentoService.uploadFile(fileName, file);
+                        String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/" + "documentos/" + fileName;
 
-                if (!Validadores.isBase64Valido(doc.conteudoBase64())) {
-                    return ResponseEntity.badRequest().body("Tipo de documento inválido.");
-                }
-
-                try {
-                    byte[] conteudo = Base64.getDecoder().decode(doc.conteudoBase64());
-                    Documentos documento = new Documentos();
-                    documento.setContrato(contrato);
-                    documento.setNome(doc.nome());
-                    documento.setConteudo(conteudo);
-                    documentoRepository.save(documento);
-                } catch (IllegalArgumentException e) {
-                    return ResponseEntity.badRequest().body("Documento base64 inválido.");
+                        Documentos novoDocumento = new Documentos();
+                        novoDocumento.setContrato(contrato);
+                        novoDocumento.setNome(file.getOriginalFilename());
+                        novoDocumento.setUrl(fileUrl);
+                        documentoRepository.save(novoDocumento);
+                    } catch (IOException e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Erro ao fazer upload do documento para o Supabase Storage: " + e.getMessage());
+                    }
                 }
             }
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Contrato atualizado com sucesso. ID:"+ contrato.getIdContrato());
+        return ResponseEntity.status(HttpStatus.OK).body("Contrato atualizado com sucesso. ID:" + contrato.getIdContrato());
     }
+
 
     @Operation(summary = "Deleta um contrato")
     @Transactional
@@ -298,7 +339,12 @@ public class ContratoController {
         }
 
         try {
-            documentoRepository.deleteAllByIdContrato_IdContrato(id);
+            List<Documentos> documentos = documentoRepository.findByContratoId(id);
+            for (Documentos doc : documentos) {
+                documentoService.deleteFile(doc.getUrl().substring(doc.getUrl().lastIndexOf('/') + 1));
+                documentoRepository.deleteById(doc.getIdDocumento());
+            }
+
             entregaveisRepository.deleteAllByIdContrato_IdContrato(id);
             postoTrabalhoRepository.deleteAllByIdContrato_IdContrato(id);
             contratoRepository.deleteById(id);
@@ -356,7 +402,7 @@ public class ContratoController {
         return ResponseEntity.ok("Contrato arquivado com sucesso.");
     }
 
-    @Operation(summary = "Desarquviar o contrato (status: Ativo)")
+    @Operation(summary = "Desarquivar o contrato (status: Ativo)")
     @PatchMapping("/{id}/desarquivar")
     @Transactional
     public ResponseEntity<?> desarquivarContrato(@PathVariable Long id) {
@@ -380,5 +426,4 @@ public class ContratoController {
 
         return ResponseEntity.ok("Contrato desarquivado com sucesso.");
     }
-
 }
