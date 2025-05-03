@@ -18,9 +18,9 @@ public class ContratoResponse {
     private Integer idContratante;
     private Long status;
     private String tipoContrato;
-    private List<Entregaveis> entregaveis;
-    private List<PostoTrabalho> postosTrabalho;
-    private List<Documentos> documentos;
+    private List<EntregaveisResponse> entregaveis;
+    private List<PostoTrabalhoResponse> postosTrabalho;
+    private List<DocumentoResponse> documentos;
 
     public Long getIdContrato() {
         return idContrato;
@@ -86,27 +86,27 @@ public class ContratoResponse {
         this.tipoContrato = tipoContrato;
     }
 
-    public List<Entregaveis> getEntregaveis() {
+    public List<EntregaveisResponse> getEntregaveis() {
         return entregaveis;
     }
 
-    public void setEntregaveis(List<Entregaveis> entregaveis) {
+    public void setEntregaveis(List<EntregaveisResponse> entregaveis) {
         this.entregaveis = entregaveis;
     }
 
-    public List<PostoTrabalho> getPostosTrabalho() {
+    public List<PostoTrabalhoResponse> getPostosTrabalho() {
         return postosTrabalho;
     }
 
-    public void setPostosTrabalho(List<PostoTrabalho> postosTrabalho) {
+    public void setPostosTrabalho(List<PostoTrabalhoResponse> postosTrabalho) {
         this.postosTrabalho = postosTrabalho;
     }
 
-    public List<Documentos> getDocumentos() {
+    public List<DocumentoResponse> getDocumentos() {
         return documentos;
     }
 
-    public void setDocumentos(List<Documentos> documentos) {
+    public void setDocumentos(List<DocumentoResponse> documentos) {
         this.documentos = documentos;
     }
 }
