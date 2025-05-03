@@ -219,7 +219,7 @@ public class ContratoController {
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarContrato(@PathVariable Long id,
                                                @RequestPart("contrato") CreateContratoRequest dto,
-                                               @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) { // Use MultipartFile[]
+                                               @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
         Optional<Contrato> contratoOptional = contratoRepository.findById(id);
         if (contratoOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
