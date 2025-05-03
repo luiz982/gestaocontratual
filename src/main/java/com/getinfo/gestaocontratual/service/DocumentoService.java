@@ -23,7 +23,6 @@ public class DocumentoService {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public void uploadFile(String fileName, MultipartFile file) throws IOException {
-        // Codifica o nome do arquivo para garantir que caracteres especiais sejam tratados corretamente em URLs.
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
         String url = storageUrl + "/object/" + bucketName + "/" + encodedFileName;
 
@@ -38,13 +37,11 @@ public class DocumentoService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                // Tenta analisar a resposta como JSON, mesmo em caso de erro
                 try {
                     JsonObject errorResponse = JsonParser.parseString(response.body()).getAsJsonObject();
                     String errorMessage = errorResponse.get("message").getAsString();
                     throw new IOException("Failed to upload file to Supabase Storage: " + errorMessage);
                 } catch (Exception e) {
-                    // Se a resposta não for um JSON válido, retorna a mensagem de erro original
                     throw new IOException("Failed to upload file to Supabase Storage. Status Code: " + response.statusCode() + ", Response Body: " + response.body());
                 }
             }
@@ -54,7 +51,6 @@ public class DocumentoService {
     }
 
     public void deleteFile(String fileUrl) {
-        // Extract file name from URL
         String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         String url = storageUrl + "/object/" + bucketName + "/" + fileName;
 
@@ -68,7 +64,6 @@ public class DocumentoService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                // Log the error, mas não interrompa a deleção.
                 System.err.println("Failed to delete file from Supabase Storage. Status Code: " + response.statusCode() + ", Response Body: " + response.body());
             }
         } catch (IOException | InterruptedException e) {
