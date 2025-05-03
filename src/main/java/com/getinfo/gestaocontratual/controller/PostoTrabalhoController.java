@@ -53,7 +53,6 @@ public class PostoTrabalhoController {
         List<PostoTrabalhoResponse> response = postoRepository.findByIdContrato_IdContrato(contratoId).stream()
                 .map(p -> new PostoTrabalhoResponse(
                         p.getId(),
-                        p.getIdContrato().getIdContrato(),
                         p.getNome(),
                         p.getDescricao()
                 ))
@@ -74,7 +73,6 @@ public class PostoTrabalhoController {
         PostoTrabalho p = posto.get();
         return ResponseEntity.ok(new PostoTrabalhoResponse(
                 p.getId(),
-                p.getIdContrato().getIdContrato(),
                 p.getNome(),
                 p.getDescricao()
         ));
