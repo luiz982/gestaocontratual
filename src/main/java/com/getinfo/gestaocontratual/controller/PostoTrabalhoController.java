@@ -7,6 +7,7 @@ import com.getinfo.gestaocontratual.entities.PostoTrabalho;
 import com.getinfo.gestaocontratual.repository.ContratoRepository;
 import com.getinfo.gestaocontratual.repository.PostoTrabalhoRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Tag(name = "Postos de Trabalho", description = "Gerenciamento de postos de trabalho")
 @RestController
-@RequestMapping("/postos-trabalho")
+@RequestMapping("/postos")
 public class PostoTrabalhoController {
 
     private final PostoTrabalhoRepository postoRepository;

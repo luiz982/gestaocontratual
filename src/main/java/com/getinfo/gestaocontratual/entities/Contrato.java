@@ -1,6 +1,8 @@
 package com.getinfo.gestaocontratual.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.util.Date;
 
 @Entity
@@ -30,6 +32,11 @@ public class Contrato {
     @Column(nullable = false)
     private String tipoContrato;
 
+    @Column(name = "created_at")
+    @Temporal(TemporalType.DATE)
+    @CreationTimestamp
+    private Date createdAt;
+
     @ManyToOne
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
     private Contratante idContratante;
@@ -37,6 +44,14 @@ public class Contrato {
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status")
     private Status status;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public Long getIdContrato() {
         return idContrato;

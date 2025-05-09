@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.getinfo.gestaocontratual.controller.dto.UtilResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Tag(name = "Utilitários", description = "Endpoints auxiliares e utilitários")
 @RestController
-@RequestMapping("/util")
+@RequestMapping("/utils")
 public class UtilController {
 
     private final RestTemplate restTemplate = new RestTemplate();

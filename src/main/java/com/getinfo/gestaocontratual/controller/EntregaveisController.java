@@ -4,21 +4,19 @@ import com.getinfo.gestaocontratual.controller.dto.CreateEntregaveisRequest;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name = "Entregáveis", description = "Gerenciamento de entregáveis")
 @RestController
+@RequestMapping("/entregaveis")
 public class EntregaveisController {
 
     private final EntregaveisRepository EntregaveisRepository;
@@ -29,7 +27,7 @@ public class EntregaveisController {
         this.contratoRepository = contratoRepository;
     }
 
-    @GetMapping("/entregaveis")
+    @GetMapping
     public ResponseEntity<List<Entregaveis>> Entregaveis(){
         var Entregaveis = EntregaveisRepository.findAll();
 
@@ -38,7 +36,7 @@ public class EntregaveisController {
     }
 
     @Operation(summary = "Retorna todos os entregáveis de um contrato")
-    @GetMapping("/entregaveis/contrato/{idContrato}")
+    @GetMapping("/contrato/{idContrato}")
     public ResponseEntity<?> entregaveisPorContrato(@PathVariable Long idContrato) {
         List<Entregaveis> lista = EntregaveisRepository.findByIdContrato_IdContrato(idContrato);
 
@@ -93,7 +91,7 @@ public class EntregaveisController {
         return ResponseEntity.ok(msg);
     }
 
-    @DeleteMapping("entregaveis/{id}")
+    @DeleteMapping("{id}")
     @Transactional
     public ResponseEntity<String> DeletarEntregaveis(@PathVariable("id") Long idEntregavel)
     {

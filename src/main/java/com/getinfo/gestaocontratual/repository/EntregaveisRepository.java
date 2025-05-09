@@ -13,4 +13,8 @@ public interface EntregaveisRepository extends JpaRepository<Entregaveis, Long> 
     List<Entregaveis> findByIdContrato_IdContrato(Long idContrato);
     void deleteAllByIdContrato_IdContrato(Long idContrato);
     List<Entregaveis> findByDtFimBetween(LocalDate dtInicio, LocalDate dtFinal);
+
+    long countByStatusTrue();
+
+    long countByStatusFalse();
 }
