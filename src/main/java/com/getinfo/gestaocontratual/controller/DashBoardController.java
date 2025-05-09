@@ -27,7 +27,7 @@ public class DashBoardController {
     }
 
     @Operation(summary = "Quantidade de contratos cadastrados por mês em um ano")
-    @GetMapping("/dashboard/contratosPorMes")
+    @GetMapping("/contratosPorMes")
     public ResponseEntity<Map<String, Long>> contratosPorMes(@RequestParam(defaultValue = "2025") int ano) {
         List<Object[]> resultado = contratoRepository.countContratosPorMes(ano);
 
@@ -42,7 +42,7 @@ public class DashBoardController {
     }
 
     @Operation(summary = "Retorna os totais para os KPIs do dashboard")
-    @GetMapping("/dashboard/KPIs")
+    @GetMapping("/KPIs")
     public ResponseEntity<?> getKpisDashboard() {
         long totalPublicos = contratoRepository.countByTipoContratoIgnoreCase("publico");
         long totalPrivados = contratoRepository.countByTipoContratoIgnoreCase("privado");
@@ -58,7 +58,7 @@ public class DashBoardController {
     }
 
     @Operation(summary = "Retorna os contratos que estão a dois meses ou menos de terminar")
-    @GetMapping("/dashboard/ContratosPertoDeAcabar")
+    @GetMapping("/ContratosPertoDeAcabar")
     public ResponseEntity<List<Contrato>> contratosPertoDeAcabar() {
         LocalDate hoje = LocalDate.now();
         LocalDate limite = hoje.plusMonths(2);
