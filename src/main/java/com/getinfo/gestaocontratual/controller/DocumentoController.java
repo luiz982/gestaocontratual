@@ -6,6 +6,7 @@ import com.getinfo.gestaocontratual.repository.ContratoRepository;
 import com.getinfo.gestaocontratual.repository.DocumentoRepository;
 import com.getinfo.gestaocontratual.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Tag(name = "Documentos", description = "Gerenciamento de documentos")
 @RestController
 @RequestMapping("/documentos")
 public class DocumentoController {

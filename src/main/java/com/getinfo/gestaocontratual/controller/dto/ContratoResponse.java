@@ -1,5 +1,6 @@
 package com.getinfo.gestaocontratual.controller.dto;
 
+import com.getinfo.gestaocontratual.entities.Contratante;
 import com.getinfo.gestaocontratual.entities.Documentos;
 import com.getinfo.gestaocontratual.entities.Entregaveis;
 import com.getinfo.gestaocontratual.entities.PostoTrabalho;
@@ -21,6 +22,15 @@ public class ContratoResponse {
     private List<EntregaveisResponse> entregaveis;
     private List<PostoTrabalhoResponse> postosTrabalho;
     private List<DocumentoResponse> documentos;
+    private Contratante contratante;
+
+    public Contratante getContratante() {
+        return contratante;
+    }
+
+    public void setContratante(Contratante contratante) {
+        this.contratante = contratante;
+    }
 
     public Long getIdContrato() {
         return idContrato;

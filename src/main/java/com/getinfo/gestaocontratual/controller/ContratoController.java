@@ -5,29 +5,21 @@ import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
 import com.getinfo.gestaocontratual.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
-import javax.print.attribute.standard.Media;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.Base64;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+@Tag(name = "Contratos", description = "Gerenciamento de contratos")
 @RestController
 @RequestMapping("/contratos")
 public class ContratoController {
@@ -206,13 +198,15 @@ public class ContratoController {
                 .map(d -> new DocumentoResponse(d.getIdDocumento(), d.getNome(), d.getUrl()))
                 .toList();
 
+        Contratante contratante = contrato.getIdContratante();
+
         ContratoResponse contratoResponse = new ContratoResponse();
         contratoResponse.setIdContrato(contrato.getIdContrato());
         contratoResponse.setNumContrato(contrato.getNumContrato());
         contratoResponse.setDtInicio(contrato.getDtInicio());
         contratoResponse.setDtFim(contrato.getDtFim());
         contratoResponse.setDtAlteracao(contrato.getDtAlteracao());
-        contratoResponse.setIdContratante(contrato.getIdContratante() != null ? contrato.getIdContratante().getIdContratante() : null);
+        contratoResponse.setContratante(contratante);
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
         contratoResponse.setEntregaveis(entregaveisResponseList);

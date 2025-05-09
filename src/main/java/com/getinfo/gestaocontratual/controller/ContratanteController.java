@@ -6,6 +6,7 @@ import com.getinfo.gestaocontratual.service.ContratanteService;
 import com.getinfo.gestaocontratual.utils.Validadores;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 
+@Tag(name = "Contratantes", description = "Gerenciamento de contratantes")
 @RestController
 @RequestMapping("/contratantes")
 public class ContratanteController {

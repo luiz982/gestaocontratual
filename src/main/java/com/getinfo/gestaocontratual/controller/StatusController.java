@@ -4,6 +4,7 @@ import com.getinfo.gestaocontratual.controller.dto.CreateStatusRequest;
 import com.getinfo.gestaocontratual.entities.Status;
 import com.getinfo.gestaocontratual.repository.StatusRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name = "Status", description = "Gerenciamento de status dos contratos")
 @RestController
-@RequestMapping("/status")
+@RequestMapping("/statusContrato")
 public class StatusController {
     private final StatusRepository statusRepository;
 
