@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "contratos")
@@ -41,9 +42,20 @@ public class Contrato {
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
     private Contratante idContratante;
 
+    @OneToMany(mappedBy = "contrato")
+    private List<Colaborador> colaboradores;
+
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status")
     private Status status;
+
+    public List<Colaborador> getColaboradores() {
+        return colaboradores;
+    }
+
+    public void setColaboradores(List<Colaborador> colaboradores) {
+        this.colaboradores = colaboradores;
+    }
 
     public Date getCreatedAt() {
         return createdAt;
