@@ -1,9 +1,6 @@
 package com.getinfo.gestaocontratual.controller.dto;
 
-import com.getinfo.gestaocontratual.entities.Contratante;
-import com.getinfo.gestaocontratual.entities.Documentos;
-import com.getinfo.gestaocontratual.entities.Entregaveis;
-import com.getinfo.gestaocontratual.entities.PostoTrabalho;
+import com.getinfo.gestaocontratual.entities.*;
 import lombok.Data;
 
 import java.util.Date;
@@ -23,6 +20,15 @@ public class ContratoResponse {
     private List<PostoTrabalhoResponse> postosTrabalho;
     private List<DocumentoResponse> documentos;
     private Contratante contratante;
+    private List<Colaborador> colaborador;
+
+    public List<Colaborador> getColaborador() {
+        return colaborador;
+    }
+
+    public void setColaborador(List<Colaborador> colaborador) {
+        this.colaborador = colaborador;
+    }
 
     public Contratante getContratante() {
         return contratante;
