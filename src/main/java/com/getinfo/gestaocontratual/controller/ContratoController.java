@@ -30,9 +30,10 @@ public class ContratoController {
     private final PostoTrabalhoRepository postoTrabalhoRepository;
     private final EntregaveisRepository entregaveisRepository;
     private final DocumentoService documentoService;
+    private final ColaboradorRepository colaboradorRepository;
 
     @Autowired
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService) {
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
         this.statusRepository = statusRepository;
@@ -40,6 +41,7 @@ public class ContratoController {
         this.postoTrabalhoRepository = postoTrabalhoRepository;
         this.entregaveisRepository = entregaveisRepository;
         this.documentoService = documentoService;
+        this.colaboradorRepository = colaboradorRepository;
     }
 
     @Operation(summary = "Cadastro de contrato")
@@ -59,9 +61,21 @@ public class ContratoController {
                     .body("Erro: A data de início não pode ser vazia.");
         }
 
+
+
         Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
 
         Contrato contrato = new Contrato();
+
+        if (!dto.colaboradores().isEmpty() && !(dto.colaboradores() == null)){
+            List<Colaborador> colaboradores = colaboradorRepository.findAllById(dto.colaboradores());
+            if (colaboradores.size() != dto.colaboradores().size()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Erro: Um ou mais colaboradores informados não existem.");
+            }
+            contrato.setColaboradores(colaboradores);
+        }
+
         contrato.setNumContrato(dto.numContrato());
         contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
@@ -185,6 +199,7 @@ public class ContratoController {
         List<Entregaveis> entregaveis = entregaveisRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<PostoTrabalho> postosTrabalho = postoTrabalhoRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<Documentos> documentos = documentoRepository.findByContratoId(contrato.getIdContrato());
+        List<Colaborador> colaboradores = colaboradorRepository.findByContrato_IdContrato(contrato.getIdContrato());
 
         List<EntregaveisResponse> entregaveisResponseList = entregaveis.stream()
                 .map(e -> new EntregaveisResponse(e.getIdEntregavel(), e.getNome(), e.getDtInicio(), e.getDtFim(), e.isStatus()))
@@ -198,6 +213,7 @@ public class ContratoController {
                 .map(d -> new DocumentoResponse(d.getIdDocumento(), d.getNome(), d.getUrl()))
                 .toList();
 
+
         Contratante contratante = contrato.getIdContratante();
 
         ContratoResponse contratoResponse = new ContratoResponse();
@@ -207,6 +223,7 @@ public class ContratoController {
         contratoResponse.setDtFim(contrato.getDtFim());
         contratoResponse.setDtAlteracao(contrato.getDtAlteracao());
         contratoResponse.setContratante(contratante);
+        contratoResponse.setColaborador(colaboradores);
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
         contratoResponse.setEntregaveis(entregaveisResponseList);
@@ -238,6 +255,17 @@ public class ContratoController {
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro: A data de início não pode ser vazia.");
+        }
+
+        if (dto.colaboradores() != null) {
+            List<Colaborador> colaboradores = colaboradorRepository.findAllById(dto.colaboradores());
+
+            if (colaboradores.size() != dto.colaboradores().size()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Erro: Um ou mais colaboradores informados não existem.");
+            }
+
+            contrato.setColaboradores(colaboradores);
         }
 
         Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
