@@ -20,4 +20,8 @@ public interface ContratoRepository  extends JpaRepository<Contrato, Long> {
     List<Object[]> countContratosPorMes(@Param("ano") int ano);
 
     long countByTipoContratoIgnoreCase(String publico);
+    long countByStatus_NomeIgnoreCase(String nome);
+
+    @Query("SELECT COUNT(c) FROM Contrato c WHERE LOWER(c.status.nome) <> 'arquivado'")
+    long countContratosAtivos();
 }

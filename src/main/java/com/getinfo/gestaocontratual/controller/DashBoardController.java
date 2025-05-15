@@ -44,14 +44,15 @@ public class DashBoardController {
     @Operation(summary = "Retorna os totais para os KPIs do dashboard")
     @GetMapping("/KPIs")
     public ResponseEntity<?> getKpisDashboard() {
-        long totalPublicos = contratoRepository.countByTipoContratoIgnoreCase("publico");
-        long totalPrivados = contratoRepository.countByTipoContratoIgnoreCase("privado");
+        long contratosArquivados = contratoRepository.countByStatus_NomeIgnoreCase("arquivado");
+        long contratosAtivos = contratoRepository.countContratosAtivos();
+
         long entregaveisConcluidos = entregaveisRepository.countByStatusTrue();
         long entregaveisPendentes = entregaveisRepository.countByStatusFalse();
 
         return ResponseEntity.ok(Map.of(
-                "ContratosPublicos", totalPublicos,
-                "ContratosPrivados", totalPrivados,
+                "ContratosArquivados", contratosArquivados,
+                "ContratosAtivos", contratosAtivos,
                 "EntregaveisConcluidos", entregaveisConcluidos,
                 "EntregaveisPendentes", entregaveisPendentes
         ));
