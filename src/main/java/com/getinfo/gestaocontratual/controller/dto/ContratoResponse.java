@@ -20,13 +20,13 @@ public class ContratoResponse {
     private List<PostoTrabalhoResponse> postosTrabalho;
     private List<DocumentoResponse> documentos;
     private Contratante contratante;
-    private List<Colaborador> colaborador;
+    private List<ColaboradorResponse> colaborador;
 
-    public List<Colaborador> getColaborador() {
+    public List<ColaboradorResponse> getColaborador() {
         return colaborador;
     }
 
-    public void setColaborador(List<Colaborador> colaborador) {
+    public void setColaborador(List<ColaboradorResponse> colaborador) {
         this.colaborador = colaborador;
     }
 

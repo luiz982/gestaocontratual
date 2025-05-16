@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,9 +32,10 @@ public class ContratoController {
     private final EntregaveisRepository entregaveisRepository;
     private final DocumentoService documentoService;
     private final ColaboradorRepository colaboradorRepository;
+    private final ContratoColaboradorRepository contratoColaboradorRepository;
 
     @Autowired
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository) {
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository, ContratoColaboradorRepository contratoColaboradorRepository) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
         this.statusRepository = statusRepository;
@@ -42,6 +44,7 @@ public class ContratoController {
         this.entregaveisRepository = entregaveisRepository;
         this.documentoService = documentoService;
         this.colaboradorRepository = colaboradorRepository;
+        this.contratoColaboradorRepository = contratoColaboradorRepository;
     }
 
     @Operation(summary = "Cadastro de contrato")
@@ -67,13 +70,22 @@ public class ContratoController {
 
         Contrato contrato = new Contrato();
 
-        if (!dto.colaboradores().isEmpty() && !(dto.colaboradores() == null)){
-            List<Colaborador> colaboradores = colaboradorRepository.findAllById(dto.colaboradores());
-            if (colaboradores.size() != dto.colaboradores().size()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: Um ou mais colaboradores informados não existem.");
+        contrato.setColaboradores(new ArrayList<>());
+
+        if (dto.colaboradores() != null && !dto.colaboradores().isEmpty()) {
+            for (ContratoColaboradorRequest c : dto.colaboradores()) {
+                Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
+                if (colaboradorOpt.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
+                }
+                System.out.println("chegou aqui1");
+                ContratoColaborador relacao = new ContratoColaborador();
+                relacao.setColaborador(colaboradorOpt.get());
+                relacao.setContrato(contrato);
+                relacao.setFuncaoContrato(c.funcaoContrato());
+                System.out.println("chegou aqui2");
+                contrato.getColaboradores().add(relacao);
             }
-            contrato.setColaboradores(colaboradores);
         }
 
         contrato.setNumContrato(dto.numContrato());
@@ -83,9 +95,7 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
-
         contrato = contratoRepository.save(contrato);
-
         if (dto.entregaveis() != null) {
             for (var e : dto.entregaveis()) {
                 if (e.nome() == null || e.nome().isBlank()) {
@@ -151,6 +161,7 @@ public class ContratoController {
             }
         }
 
+
         return ResponseEntity.status(HttpStatus.CREATED).body("Contrato cadastrado com sucesso. ID:" + contrato.getIdContrato());
     }
 
@@ -199,7 +210,19 @@ public class ContratoController {
         List<Entregaveis> entregaveis = entregaveisRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<PostoTrabalho> postosTrabalho = postoTrabalhoRepository.findByIdContrato_IdContrato(contrato.getIdContrato());
         List<Documentos> documentos = documentoRepository.findByContratoId(contrato.getIdContrato());
-        List<Colaborador> colaboradores = colaboradorRepository.findByContrato_IdContrato(contrato.getIdContrato());
+        List<ContratoColaborador> relacoesColaboradores = contratoColaboradorRepository.findByContrato_IdContrato(contrato.getIdContrato());
+        List<ColaboradorResponse> colaboradoresResponse = relacoesColaboradores.stream()
+                .map(rel -> {
+                    Colaborador c = rel.getColaborador();
+                    return new ColaboradorResponse(
+                            c.getId(),
+                            c.getNome(),
+                            c.getCpf(),
+                            c.getCargo(),
+                            c.isSituacao(),
+                            rel.getFuncaoContrato()
+                    );
+                }).toList();
 
         List<EntregaveisResponse> entregaveisResponseList = entregaveis.stream()
                 .map(e -> new EntregaveisResponse(e.getIdEntregavel(), e.getNome(), e.getDtInicio(), e.getDtFim(), e.isStatus()))
@@ -223,7 +246,7 @@ public class ContratoController {
         contratoResponse.setDtFim(contrato.getDtFim());
         contratoResponse.setDtAlteracao(contrato.getDtAlteracao());
         contratoResponse.setContratante(contratante);
-        contratoResponse.setColaborador(colaboradores);
+        contratoResponse.setColaborador(colaboradoresResponse);
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
         contratoResponse.setEntregaveis(entregaveisResponseList);
@@ -257,15 +280,20 @@ public class ContratoController {
                     .body("Erro: A data de início não pode ser vazia.");
         }
 
-        if (dto.colaboradores() != null) {
-            List<Colaborador> colaboradores = colaboradorRepository.findAllById(dto.colaboradores());
+        if (dto.colaboradores() != null && !dto.colaboradores().isEmpty()) {
+            for (ContratoColaboradorRequest c : dto.colaboradores()) {
+                Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
+                if (colaboradorOpt.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
+                }
 
-            if (colaboradores.size() != dto.colaboradores().size()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Erro: Um ou mais colaboradores informados não existem.");
+                ContratoColaborador relacao = new ContratoColaborador();
+                relacao.setColaborador(colaboradorOpt.get());
+                relacao.setContrato(contrato);
+                relacao.setFuncaoContrato(c.funcaoContrato());
+
+                contrato.getColaboradores().add(relacao);
             }
-
-            contrato.setColaboradores(colaboradores);
         }
 
         Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
@@ -277,7 +305,6 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
-
         contrato = contratoRepository.save(contrato);
 
         if (id != null) entregaveisRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
@@ -354,6 +381,8 @@ public class ContratoController {
                 }
             }
         }
+
+
 
         return ResponseEntity.status(HttpStatus.OK).body("Contrato atualizado com sucesso. ID:" + contrato.getIdContrato());
     }

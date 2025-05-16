@@ -4,7 +4,9 @@ import com.getinfo.gestaocontratual.controller.dto.CreateColaboradorRequest;
 import com.getinfo.gestaocontratual.controller.dto.CreateDocumentoRequest;
 import com.getinfo.gestaocontratual.entities.Colaborador;
 import com.getinfo.gestaocontratual.entities.Contrato;
+import com.getinfo.gestaocontratual.entities.ContratoColaborador;
 import com.getinfo.gestaocontratual.repository.ColaboradorRepository;
+import com.getinfo.gestaocontratual.repository.ContratoColaboradorRepository;
 import com.getinfo.gestaocontratual.repository.ContratoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "Colaboradores", description = "Gerenciamento de colaboradores e funcionários da getinfo")
@@ -23,10 +27,12 @@ public class ColaboradorController {
 
     private final ColaboradorRepository colaboradorRepository;
     private final ContratoRepository contratoRepository;
+    private final ContratoColaboradorRepository contratoColaboradorRepository;
 
-    public ColaboradorController(ColaboradorRepository colaboradorRepository, ContratoRepository contratoRepository) {
+    public ColaboradorController(ColaboradorRepository colaboradorRepository, ContratoRepository contratoRepository, ContratoColaboradorRepository contratoColaboradorRepository) {
         this.colaboradorRepository = colaboradorRepository;
         this.contratoRepository = contratoRepository;
+        this.contratoColaboradorRepository = contratoColaboradorRepository;
     }
 
     @Operation(summary = "Lista todos os colaboradores")
@@ -99,7 +105,19 @@ public class ColaboradorController {
             return ResponseEntity.status(404).body("Contrato não encontrado.");
         }
 
-        List<Colaborador> colaboradores = contratoOptional.get().getColaboradores();
-        return ResponseEntity.ok(colaboradores);
+        List<ContratoColaborador> contratoColaboradores = contratoColaboradorRepository.findByContrato_IdContrato(idContrato);
+
+        List<Map<String, Object>> response = contratoColaboradores.stream().map(cc -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", cc.getColaborador().getId());
+            item.put("nome", cc.getColaborador().getNome());
+            item.put("cpf", cc.getColaborador().getCpf());
+            item.put("cargo", cc.getColaborador().getCargo());
+            item.put("situacao", cc.getColaborador().isSituacao());
+            item.put("funcaoContrato", cc.getFuncaoContrato());
+            return item;
+        }).toList();
+
+        return ResponseEntity.ok(response);
     }
 }

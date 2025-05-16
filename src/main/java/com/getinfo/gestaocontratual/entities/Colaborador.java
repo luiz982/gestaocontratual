@@ -2,6 +2,8 @@ package com.getinfo.gestaocontratual.entities;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "colaborador")
 public class Colaborador {
@@ -26,6 +28,20 @@ public class Colaborador {
     @ManyToOne
     @JoinColumn(name = "id_contrato")
     private Contrato contrato;
+
+    @OneToMany(mappedBy = "colaborador")
+    private List<ContratoColaborador> contratos;
+
+
+
+    public Contrato getContrato() {
+        return contrato;
+    }
+
+    public void setContrato(Contrato contrato) {
+        this.contrato = contrato;
+    }
+
 
     public Long getId() {
         return id;
