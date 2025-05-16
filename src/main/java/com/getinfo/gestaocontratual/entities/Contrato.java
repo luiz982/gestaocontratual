@@ -42,18 +42,18 @@ public class Contrato {
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
     private Contratante idContratante;
 
-    @OneToMany(mappedBy = "contrato")
-    private List<Colaborador> colaboradores;
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContratoColaborador> colaboradores;
 
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status")
     private Status status;
 
-    public List<Colaborador> getColaboradores() {
+    public List<ContratoColaborador> getColaboradores() {
         return colaboradores;
     }
 
-    public void setColaboradores(List<Colaborador> colaboradores) {
+    public void setColaboradores(List<ContratoColaborador> colaboradores) {
         this.colaboradores = colaboradores;
     }
 

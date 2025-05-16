@@ -18,5 +18,5 @@ public record CreateContratoRequest(
         Long idContratante,
         List<AlteraPostosTrabalhoRequest> postos,
         List<AlteraEntregaveisRequest> entregaveis,
-        List<Long> colaboradores
+        List<ContratoColaboradorRequest> colaboradores
 ) {}
