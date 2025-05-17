@@ -12,10 +12,10 @@ public record CreateContratoRequest(
         Long numContrato,
         @JsonFormat(pattern = "yyyy-MM-dd") Date dtInicio,
         @JsonFormat(pattern = "yyyy-MM-dd") Date dtFim,
-        @JsonFormat(pattern = "yyyy-MM-dd") Date dtAlteracao,
         Long idStatus,
         String tipoContrato,
         Long idContratante,
+        String responsavel,
         List<AlteraPostosTrabalhoRequest> postos,
         List<AlteraEntregaveisRequest> entregaveis,
         List<ContratoColaboradorRequest> colaboradores

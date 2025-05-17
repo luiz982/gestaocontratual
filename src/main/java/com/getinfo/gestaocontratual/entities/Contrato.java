@@ -42,6 +42,9 @@ public class Contrato {
     @JoinColumn(name = "id_contratante", referencedColumnName = "id_contratante", nullable = false)
     private Contratante idContratante;
 
+    @Column(nullable = false)
+    private String responsavel;
+
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContratoColaborador> colaboradores;
 
@@ -124,4 +127,8 @@ public class Contrato {
     public void setTipoContrato(String tipoContrato) {
         this.tipoContrato = tipoContrato;
     }
+
+    public String getResponsavel() { return responsavel; }
+
+    public void setResponsavel(String responsavel) { this.responsavel = responsavel; }
 }

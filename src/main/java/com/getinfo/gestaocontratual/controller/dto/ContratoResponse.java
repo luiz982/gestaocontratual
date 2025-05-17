@@ -16,6 +16,7 @@ public class ContratoResponse {
     private Integer idContratante;
     private Long status;
     private String tipoContrato;
+    private String responsavel;
     private List<EntregaveisResponse> entregaveis;
     private List<PostoTrabalhoResponse> postosTrabalho;
     private List<DocumentoResponse> documentos;
@@ -32,6 +33,14 @@ public class ContratoResponse {
 
     public Contratante getContratante() {
         return contratante;
+    }
+
+    public String getResponsavel() {
+        return responsavel;
+    }
+
+    public void setResponsavel(String responsavel) {
+        this.responsavel = responsavel;
     }
 
     public void setContratante(Contratante contratante) {
