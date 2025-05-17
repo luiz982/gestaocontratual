@@ -29,17 +29,16 @@ public class EntregaveisController {
 
     private final EntregaveisRepository EntregaveisRepository;
     private final ContratoRepository contratoRepository;
-    private final EntregavelColaboradorRepository entregaveisColaboradorRepository;
+    private final EntregavelColaboradorRepository entregavelColaboradorRepository;
     private final ColaboradorRepository colaboradorRepository;
 
-    public EntregaveisController(EntregaveisRepository entregaveisRepository, 
-                                ContratoRepository contratoRepository,
-                                EntregavelColaboradorRepository entregaveisColaboradorRepository,
-                                ColaboradorRepository colaboradorRepository) {
+    public EntregaveisController(EntregaveisRepository entregaveisRepository,
+                                 ContratoRepository contratoRepository, EntregavelColaboradorRepository entregavelColaboradorRepository,
+                                 ColaboradorRepository colaboradorRepository) {
 
         this.EntregaveisRepository = entregaveisRepository;
         this.contratoRepository = contratoRepository;
-        this.entregaveisColaboradorRepository = entregaveisColaboradorRepository;
+        this.entregavelColaboradorRepository = entregavelColaboradorRepository;
         this.colaboradorRepository = colaboradorRepository;
     }
 
@@ -63,7 +62,7 @@ public class EntregaveisController {
         
         List<EntregaveisResponse> listaEntregaveisDetalhe = new ArrayList<>();
         for (Entregaveis entregavel : listaEntregaveis) {
-                    List<EntregaveisColaborador> colaboradores = entregaveisColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
+                    List<EntregaveisColaborador> colaboradores = entregavelColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
                             List<ColaboradorResponse> colaboradoresEntregaveisResponse = colaboradores.stream()
                             .map(rel -> {
                                 Colaborador c = rel.getColaborador();

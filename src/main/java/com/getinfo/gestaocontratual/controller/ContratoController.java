@@ -33,10 +33,10 @@ public class ContratoController {
     private final DocumentoService documentoService;
     private final ColaboradorRepository colaboradorRepository;
     private final ContratoColaboradorRepository contratoColaboradorRepository;
-    private final EntregavelColaboradorRepository entregaveisColaboradorRepository;
+    private final EntregavelColaboradorRepository entregavelColaboradorRepository;
 
     @Autowired
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository, ContratoColaboradorRepository contratoColaboradorRepository, EntregavelColaboradorRepository entregaveisColaboradorRepository) {
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository, ContratoColaboradorRepository contratoColaboradorRepository, EntregavelColaboradorRepository entregavelColaboradorRepository) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
         this.statusRepository = statusRepository;
@@ -46,8 +46,7 @@ public class ContratoController {
         this.documentoService = documentoService;
         this.colaboradorRepository = colaboradorRepository;
         this.contratoColaboradorRepository = contratoColaboradorRepository;
-        this.entregaveisColaboradorRepository = entregaveisColaboradorRepository;
-
+        this.entregavelColaboradorRepository = entregavelColaboradorRepository;
     }
 
     @Operation(summary = "Cadastro de contrato")
@@ -255,7 +254,7 @@ public class ContratoController {
                 // Mapeiar os entregáveis e seus colaboradores
                 List<EntregaveisResponse> listaEntregaveisDetalhe = new ArrayList<>();
                 for (Entregaveis entregavel : entregaveis) {
-                    List<EntregaveisColaborador> colaboradores = entregaveisColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
+                    List<EntregaveisColaborador> colaboradores = entregavelColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
                             List<ColaboradorResponse> colaboradoresEntregaveisResponse = colaboradores.stream()
                             .map(rel -> {
                                 Colaborador c = rel.getColaborador();
