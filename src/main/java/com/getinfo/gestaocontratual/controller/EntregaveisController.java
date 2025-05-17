@@ -1,7 +1,6 @@
 package com.getinfo.gestaocontratual.controller;
 
 import com.getinfo.gestaocontratual.controller.dto.ColaboradorResponse;
-import com.getinfo.gestaocontratual.controller.dto.ContratoColaboradorRequest;
 import com.getinfo.gestaocontratual.controller.dto.CreateEntregaveisRequest;
 import com.getinfo.gestaocontratual.controller.dto.EntregaveisResponse;
 import com.getinfo.gestaocontratual.controller.dto.EntregavelColaboradorRequest;
@@ -17,10 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Tag(name = "Entregáveis", description = "Gerenciamento de entregáveis")
 @RestController
@@ -29,16 +26,16 @@ public class EntregaveisController {
 
     private final EntregaveisRepository EntregaveisRepository;
     private final ContratoRepository contratoRepository;
-    private final EntregavelColaboradorRepository entregavelColaboradorRepository;
+    private final EntregaveisColaboradorRepository entregaveisColaboradorRepository;
     private final ColaboradorRepository colaboradorRepository;
 
     public EntregaveisController(EntregaveisRepository entregaveisRepository,
-                                 ContratoRepository contratoRepository, EntregavelColaboradorRepository entregavelColaboradorRepository,
+                                 ContratoRepository contratoRepository, EntregaveisColaboradorRepository entregaveisColaboradorRepository,
                                  ColaboradorRepository colaboradorRepository) {
 
         this.EntregaveisRepository = entregaveisRepository;
         this.contratoRepository = contratoRepository;
-        this.entregavelColaboradorRepository = entregavelColaboradorRepository;
+        this.entregaveisColaboradorRepository = entregaveisColaboradorRepository;
         this.colaboradorRepository = colaboradorRepository;
     }
 
@@ -62,7 +59,7 @@ public class EntregaveisController {
         
         List<EntregaveisResponse> listaEntregaveisDetalhe = new ArrayList<>();
         for (Entregaveis entregavel : listaEntregaveis) {
-                    List<EntregaveisColaborador> colaboradores = entregavelColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
+                    List<EntregaveisColaborador> colaboradores = entregaveisColaboradorRepository.findByEntregavel_IdEntregavel(entregavel.getIdEntregavel());
                             List<ColaboradorResponse> colaboradoresEntregaveisResponse = colaboradores.stream()
                             .map(rel -> {
                                 Colaborador c = rel.getColaborador();
