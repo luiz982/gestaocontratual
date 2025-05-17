@@ -2,6 +2,7 @@ package com.getinfo.gestaocontratual.entities;
 
 import jakarta.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "entregaveis")
@@ -24,6 +25,9 @@ public class Entregaveis {
 
     @Column(name = "Dt_Fim", nullable = true)
     private Date dtFim;
+
+    @OneToMany(mappedBy = "entregavel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EntregaveisColaborador> colaboradores;
 
     @Column(name = "Status")
     private boolean status;
@@ -76,5 +80,13 @@ public class Entregaveis {
 
     public void setStatus(boolean status) {
         this.status = status;
-    }    
+    }   
+
+    public List<EntregaveisColaborador> getColaboradores() {
+        return colaboradores;
+    }
+
+    public void setColaboradores(List<EntregaveisColaborador> colaboradores) {
+        this.colaboradores = colaboradores;
+    }
 }
