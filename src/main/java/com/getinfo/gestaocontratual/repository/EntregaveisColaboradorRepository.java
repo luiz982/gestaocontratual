@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EntregaveisColaboradorRepository extends JpaRepository<EntregaveisColaborador, Integer> {
-    List<EntregaveisColaborador> findByEntregavel_IdEntregavel(Integer entregavelId);    
+public interface EntregaveisColaboradorRepository extends JpaRepository<EntregaveisColaborador, Long> {
+    List<EntregaveisColaborador> findByEntregavel_IdEntregavel(Long entregavelId);
 }
