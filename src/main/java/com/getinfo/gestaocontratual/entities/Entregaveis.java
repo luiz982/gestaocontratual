@@ -11,7 +11,7 @@ public class Entregaveis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_Entregavel")
-    private int idEntregavel;
+    private Long idEntregavel;
 
     @ManyToOne
     @JoinColumn(name = "id_contrato", referencedColumnName = "id_contrato", nullable = false)
@@ -41,11 +41,11 @@ public class Entregaveis {
     }
 
     // Getters e Setters
-    public int getIdEntregavel() {
+    public Long getIdEntregavel() {
         return idEntregavel;
     }
 
-    public void setIdEntregavel(int idEntregavel) {
+    public void setIdEntregavel(Long idEntregavel) {
         this.idEntregavel = idEntregavel;
     }
 
