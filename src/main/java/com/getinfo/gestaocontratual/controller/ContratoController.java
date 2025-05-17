@@ -274,7 +274,7 @@ public class ContratoController {
                             entregavel.getNome(),
                             entregavel.getDtInicio(),
                             entregavel.getDtFim(),                    
-                            entregavel.isStatus(),
+                            entregavel.getStatus(),
                             colaboradoresEntregaveisResponse
                     );
                     listaEntregaveisDetalhe.add(resposta);

@@ -30,7 +30,7 @@ public class Entregaveis {
     private List<EntregaveisColaborador> colaboradores;
 
     @Column(name = "Status")
-    private boolean status;
+    private StatusEntregavel status;
 
     public Contrato getIdContrato() {
         return idContrato;
@@ -74,11 +74,11 @@ public class Entregaveis {
         this.dtFim = dtFim;
     }
 
-    public boolean isStatus() {
+    public StatusEntregavel getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(StatusEntregavel status) {
         this.status = status;
     }   
 
