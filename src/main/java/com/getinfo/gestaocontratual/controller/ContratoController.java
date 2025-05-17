@@ -91,8 +91,8 @@ public class ContratoController {
         contrato.setNumContrato(dto.numContrato());
         contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
-        contrato.setDtAlteracao(dto.dtAlteracao());
         contrato.setIdContratante(contratante);
+        contrato.setResponsavel(dto.responsavel());
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
         contrato = contratoRepository.save(contrato);
@@ -247,6 +247,7 @@ public class ContratoController {
         contratoResponse.setDtAlteracao(contrato.getDtAlteracao());
         contratoResponse.setContratante(contratante);
         contratoResponse.setColaborador(colaboradoresResponse);
+        contratoResponse.setResponsavel(contrato.getResponsavel());
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
         contratoResponse.setEntregaveis(entregaveisResponseList);
@@ -301,10 +302,10 @@ public class ContratoController {
         contrato.setNumContrato(dto.numContrato());
         contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
-        contrato.setDtAlteracao(dto.dtAlteracao());
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
+        contrato.setResponsavel(dto.responsavel());
         contrato = contratoRepository.save(contrato);
 
         if (id != null) entregaveisRepository.deleteAllByIdContrato_IdContrato(contrato.getIdContrato());
