@@ -41,22 +41,19 @@ public class DashBoardController {
         return ResponseEntity.ok(resposta);
     }
 
-    @Operation(summary = "Retorna os totais para os KPIs do dashboard")
-    @GetMapping("/KPIs")
-    public ResponseEntity<?> getKpisDashboard() {
-        long contratosArquivados = contratoRepository.countByStatus_NomeIgnoreCase("arquivado");
-        long contratosAtivos = contratoRepository.countContratosAtivos();
-
-        long entregaveisConcluidos = entregaveisRepository.countByStatusTrue();
-        long entregaveisPendentes = entregaveisRepository.countByStatusFalse();
-
-        return ResponseEntity.ok(Map.of(
-                "ContratosArquivados", contratosArquivados,
-                "ContratosAtivos", contratosAtivos,
-                "EntregaveisConcluidos", entregaveisConcluidos,
-                "EntregaveisPendentes", entregaveisPendentes
-        ));
-    }
+//    @Operation(summary = "Retorna os totais para os KPIs do dashboard")
+//    @GetMapping("/KPIs")
+//    public ResponseEntity<?> getKpisDashboard() {
+//        long contratosArquivados = contratoRepository.countByStatus_NomeIgnoreCase("arquivado");
+//        long contratosAtivos = contratoRepository.countContratosAtivos();
+//
+//        return ResponseEntity.ok(Map.of(
+//                "ContratosArquivados", contratosArquivados,
+//                "ContratosAtivos", contratosAtivos,
+//                "EntregaveisConcluidos", entregaveisConcluidos,
+//                "EntregaveisPendentes", entregaveisPendentes
+//        ));
+//    }
 
     @Operation(summary = "Retorna os contratos que estão a dois meses ou menos de terminar")
     @GetMapping("/ContratosPertoDeAcabar")
