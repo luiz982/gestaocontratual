@@ -54,7 +54,6 @@ public class EntregaveisController {
     @Operation(summary = "Retorna todos os entregáveis de um contrato")
     @GetMapping("/contrato/{idContrato}")
     public ResponseEntity<?> entregaveisPorContrato(@PathVariable Long idContrato) {
-        // Buscar os entregáveis do contrato
         List<Entregaveis> listaEntregaveis = EntregaveisRepository.findByIdContrato_IdContrato(idContrato);
     
         if (listaEntregaveis.isEmpty()) {

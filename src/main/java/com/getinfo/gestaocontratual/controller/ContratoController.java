@@ -109,14 +109,39 @@ public class ContratoController {
                     return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
                 }
 
+                if (e.dtFim() != null && e.dtInicio().after(e.dtFim())) {
+                    return ResponseEntity.badRequest().body("Erro: Data de início maior que a data de fim no entregável: " + e.nome());
+                }
+
                 try {
                     Entregaveis entregavel = new Entregaveis();
                     entregavel.setIdContrato(contrato);
                     entregavel.setNome(e.nome());
                     entregavel.setDtInicio(e.dtInicio());
                     entregavel.setDtFim(e.dtFim());
+                    entregavel.setStatus(e.Status());
+
+                    entregavel.setColaboradores(new ArrayList<>());
+
+                    if (e.colaboradores() != null && !e.colaboradores().isEmpty()) {
+                        for (EntregavelColaboradorRequest c : e.colaboradores()) {
+                            Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
+                            if (colaboradorOpt.isEmpty()) {
+                                return ResponseEntity.badRequest()
+                                        .body("Colaborador com ID " + c.id() + " não encontrado para o entregável " + e.nome());
+                            }
+
+                            EntregaveisColaborador relacao = new EntregaveisColaborador();
+                            relacao.setColaborador(colaboradorOpt.get());
+                            relacao.setEntregavel(entregavel);
+                            relacao.setFuncaoEntregavel(c.funcaoEntregavel());
+
+                            entregavel.getColaboradores().add(relacao);
+                        }
+                    }
 
                     entregaveisRepository.save(entregavel);
+
                 } catch (Exception ex) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Erro ao salvar entregável: " + ex.getMessage());
@@ -275,7 +300,7 @@ public class ContratoController {
         contratoResponse.setContratante(contratante);
         contratoResponse.setColaborador(colaboradoresResponse);
         contratoResponse.setResponsavel(contrato.getResponsavel());
-        contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getIdStatus() : null);
+        contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getNome() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
         contratoResponse.setEntregaveis(listaEntregaveisDetalhe);
         contratoResponse.setPostosTrabalho(postosTrabalhoResponseList);
@@ -347,14 +372,39 @@ public class ContratoController {
                     return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
                 }
 
+                if (e.dtFim() != null && e.dtInicio().after(e.dtFim())) {
+                    return ResponseEntity.badRequest().body("Erro: Data de início maior que a data de fim no entregável: " + e.nome());
+                }
+
                 try {
                     Entregaveis entregavel = new Entregaveis();
                     entregavel.setIdContrato(contrato);
                     entregavel.setNome(e.nome());
                     entregavel.setDtInicio(e.dtInicio());
                     entregavel.setDtFim(e.dtFim());
+                    entregavel.setStatus(e.Status());
+
+                    entregavel.setColaboradores(new ArrayList<>());
+
+                    if (e.colaboradores() != null && !e.colaboradores().isEmpty()) {
+                        for (EntregavelColaboradorRequest c : e.colaboradores()) {
+                            Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
+                            if (colaboradorOpt.isEmpty()) {
+                                return ResponseEntity.badRequest()
+                                        .body("Colaborador com ID " + c.id() + " não encontrado para o entregável " + e.nome());
+                            }
+
+                            EntregaveisColaborador relacao = new EntregaveisColaborador();
+                            relacao.setColaborador(colaboradorOpt.get());
+                            relacao.setEntregavel(entregavel);
+                            relacao.setFuncaoEntregavel(c.funcaoEntregavel());
+
+                            entregavel.getColaboradores().add(relacao);
+                        }
+                    }
 
                     entregaveisRepository.save(entregavel);
+
                 } catch (Exception ex) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Erro ao salvar entregável: " + ex.getMessage());
