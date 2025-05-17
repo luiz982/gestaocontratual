@@ -2,13 +2,14 @@ package com.getinfo.gestaocontratual.controller.dto;
 
 import com.getinfo.gestaocontratual.entities.Contrato;
 import com.getinfo.gestaocontratual.entities.EntregaveisColaborador;
+import com.getinfo.gestaocontratual.entities.StatusEntregavel;
 
 import jakarta.persistence.*;
 
 import java.sql.Date;
 import java.util.List;
 
-public record EntregaveisResponse(int idEntregavel, String nome, Date dtInicio, Date dtFim, boolean status, List<ColaboradorResponse> colaborador) {
+public record EntregaveisResponse(int idEntregavel, String nome, Date dtInicio, Date dtFim, StatusEntregavel status, List<ColaboradorResponse> colaborador) {
     
 }
 
