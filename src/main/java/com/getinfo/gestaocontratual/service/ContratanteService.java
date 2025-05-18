@@ -1,7 +1,10 @@
 package com.getinfo.gestaocontratual.service;
 
+import com.getinfo.gestaocontratual.controller.dto.ContratanteResumoDTO;
 import com.getinfo.gestaocontratual.entities.Contratante;
+import com.getinfo.gestaocontratual.entities.Contrato;
 import com.getinfo.gestaocontratual.repository.ContratanteRepository;
+import com.getinfo.gestaocontratual.repository.ContratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +15,13 @@ import java.util.Optional;
 public class ContratanteService {
 
     private final ContratanteRepository contratanteRepository;
+    private final ContratoRepository contratoRepository;
 
     @Autowired
-    public ContratanteService(ContratanteRepository contratanteRepository) {
+    public ContratanteService(ContratanteRepository contratanteRepository,
+                              ContratoRepository contratoRepository) {
         this.contratanteRepository = contratanteRepository;
+        this.contratoRepository = contratoRepository;
     }
 
     public List<Contratante> listarTodos() {
@@ -36,5 +42,21 @@ public class ContratanteService {
 
     public void deletar(Long id) {
         contratanteRepository.deleteById(id);
+    }
+
+    public List<ContratanteResumoDTO> listarResumoComContratosAtivos() {
+        List<Contratante> contratantes = contratanteRepository.findAll();
+
+        return contratantes.stream()
+                .map(contratante -> {
+                    long contratosAtivos = contratoRepository.countAtivosByContratante(contratante);
+
+                    return new ContratanteResumoDTO(
+                            contratante.getNomeFantasia(),
+                            contratante.getCnpj(),
+                            contratosAtivos
+                    );
+                })
+                .toList();
     }
 }

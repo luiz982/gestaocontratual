@@ -1,6 +1,7 @@
 package com.getinfo.gestaocontratual.controller;
 
 import com.getinfo.gestaocontratual.entities.Contrato;
+import com.getinfo.gestaocontratual.entities.StatusEntregavel;
 import com.getinfo.gestaocontratual.repository.ContratoRepository;
 import com.getinfo.gestaocontratual.repository.EntregaveisRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,19 +42,21 @@ public class DashBoardController {
         return ResponseEntity.ok(resposta);
     }
 
-//    @Operation(summary = "Retorna os totais para os KPIs do dashboard")
-//    @GetMapping("/KPIs")
-//    public ResponseEntity<?> getKpisDashboard() {
-//        long contratosArquivados = contratoRepository.countByStatus_NomeIgnoreCase("arquivado");
-//        long contratosAtivos = contratoRepository.countContratosAtivos();
-//
-//        return ResponseEntity.ok(Map.of(
-//                "ContratosArquivados", contratosArquivados,
-//                "ContratosAtivos", contratosAtivos,
-//                "EntregaveisConcluidos", entregaveisConcluidos,
-//                "EntregaveisPendentes", entregaveisPendentes
-//        ));
-//    }
+    @Operation(summary = "Retorna os totais para os KPIs do dashboard")
+    @GetMapping("/KPIs")
+    public ResponseEntity<?> getKpisDashboard() {
+        long contratosArquivados = contratoRepository.countByStatus_NomeIgnoreCase("arquivado");
+        long contratosAtivos = contratoRepository.countContratosAtivos();
+        long entregaveisConcluidos = entregaveisRepository.findByStatus(StatusEntregavel.FEITO).size();
+        long entregaveisPendentes = entregaveisRepository.findByStatus(StatusEntregavel.A_FAZER).size() + entregaveisRepository.findByStatus(StatusEntregavel.FAZENDO).size();
+
+        return ResponseEntity.ok(Map.of(
+                "ContratosArquivados", contratosArquivados,
+                "ContratosAtivos", contratosAtivos,
+                "EntregaveisConcluidos", entregaveisConcluidos,
+                "EntregaveisPendentes", entregaveisPendentes
+        ));
+    }
 
     @Operation(summary = "Retorna os contratos que estão a dois meses ou menos de terminar")
     @GetMapping("/ContratosPertoDeAcabar")

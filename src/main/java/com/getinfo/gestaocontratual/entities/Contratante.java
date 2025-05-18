@@ -2,6 +2,7 @@ package com.getinfo.gestaocontratual.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "contratante")
@@ -40,16 +41,19 @@ public class Contratante {
     private String telefone;
 
     @Column
+    private String telefoneFixo;
+
+    @Column
     private String cep;
 
     @Column
     private String bairro;
 
     @Column
-    private String numeroDaCasa;
+    private String rua;
 
     @Column
-    private String rua;
+    private String cidade;
 
     @Column
     private String estado;
@@ -59,6 +63,23 @@ public class Contratante {
 
     @Column
     private String agencia;
+
+    // Responsável Legal
+    @Column
+    private String responsavelLegalCpf;
+
+    @Column
+    private String responsavelLegalNome;
+
+    @Column
+    private String responsavelLegalTelefone;
+
+    @Column
+    private String responsavelLegalEmail;
+
+    @OneToMany(mappedBy = "idContratante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Contrato> contratos;
+
 
     // Getters e Setters
     public Integer getIdContratante() {
@@ -141,6 +162,14 @@ public class Contratante {
         this.telefone = telefone;
     }
 
+    public String getTelefoneFixo() {
+        return telefoneFixo;
+    }
+
+    public void setTelefoneFixo(String telefoneFixo) {
+        this.telefoneFixo = telefoneFixo;
+    }
+
     public String getCep() {
         return cep;
     }
@@ -157,20 +186,20 @@ public class Contratante {
         this.bairro = bairro;
     }
 
-    public String getNumeroDaCasa() {
-        return numeroDaCasa;
-    }
-
-    public void setNumeroDaCasa(String numeroDaCasa) {
-        this.numeroDaCasa = numeroDaCasa;
-    }
-
     public String getRua() {
         return rua;
     }
 
     public void setRua(String rua) {
         this.rua = rua;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
     }
 
     public String getEstado() {
@@ -195,5 +224,45 @@ public class Contratante {
 
     public void setAgencia(String agencia) {
         this.agencia = agencia;
+    }
+
+    public String getResponsavelLegalCpf() {
+        return responsavelLegalCpf;
+    }
+
+    public void setResponsavelLegalCpf(String responsavelLegalCpf) {
+        this.responsavelLegalCpf = responsavelLegalCpf;
+    }
+
+    public String getResponsavelLegalNome() {
+        return responsavelLegalNome;
+    }
+
+    public void setResponsavelLegalNome(String responsavelLegalNome) {
+        this.responsavelLegalNome = responsavelLegalNome;
+    }
+
+    public String getResponsavelLegalTelefone() {
+        return responsavelLegalTelefone;
+    }
+
+    public void setResponsavelLegalTelefone(String responsavelLegalTelefone) {
+        this.responsavelLegalTelefone = responsavelLegalTelefone;
+    }
+
+    public String getResponsavelLegalEmail() {
+        return responsavelLegalEmail;
+    }
+
+    public void setResponsavelLegalEmail(String responsavelLegalEmail) {
+        this.responsavelLegalEmail = responsavelLegalEmail;
+    }
+
+    public List<Contrato> getContratos() {
+        return contratos;
+    }
+
+    public void setContratos(List<Contrato> contratos) {
+        this.contratos = contratos;
     }
 }
