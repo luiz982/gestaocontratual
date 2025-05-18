@@ -2,17 +2,18 @@ package com.getinfo.gestaocontratual.controller.dto;
 
 public class ContratanteResumoDTO {
 
+    private Integer idContratante;
     private String nomeFantasia;
     private String cnpj;
     private long contratosAtivos;
 
-    public ContratanteResumoDTO(String nomeFantasia, String cnpj, long contratosAtivos) {
+    public ContratanteResumoDTO(Integer idContratante, String nomeFantasia, String cnpj, long contratosAtivos) {
+        this.idContratante = idContratante;
         this.nomeFantasia = nomeFantasia;
         this.cnpj = cnpj;
         this.contratosAtivos = contratosAtivos;
     }
 
-    // Getters and Setters
     public String getNomeFantasia() {
         return nomeFantasia;
     }
@@ -35,5 +36,13 @@ public class ContratanteResumoDTO {
 
     public void setContratosAtivos(long contratosAtivos) {
         this.contratosAtivos = contratosAtivos;
+    }
+
+    public Integer getIdContratante() {
+        return idContratante;
+    }
+
+    public void setIdContratante(Integer idContratante) {
+        this.idContratante = idContratante;
     }
 }
