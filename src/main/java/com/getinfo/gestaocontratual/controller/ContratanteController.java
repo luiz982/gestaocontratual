@@ -57,7 +57,6 @@ public class ContratanteController {
             return ResponseEntity.badRequest().body("CEP inválido.");
         }
 
-        // Validação do CPF do responsável legal, se fornecido
         if (request.responsavelLegalCpf() != null && !Validadores.isCpfValido(request.responsavelLegalCpf())) {
             return ResponseEntity.badRequest().body("CPF do responsável legal inválido.");
         }
