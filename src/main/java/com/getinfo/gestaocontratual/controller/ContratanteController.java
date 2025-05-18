@@ -3,18 +3,16 @@ package com.getinfo.gestaocontratual.controller;
 import com.getinfo.gestaocontratual.controller.dto.CreateContratanteRequest;
 import com.getinfo.gestaocontratual.entities.Contratante;
 import com.getinfo.gestaocontratual.service.ContratanteService;
-import com.getinfo.gestaocontratual.utils.Validadores;
-
+import com.getinfo.gestaocontratual.controller.dto.ContratanteResumoDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.getinfo.gestaocontratual.utils.Validadores;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
 
-@Tag(name = "Contratantes", description = "Gerenciamento de contratantes")
 @RestController
 @RequestMapping("/contratantes")
 public class ContratanteController {
@@ -59,6 +57,11 @@ public class ContratanteController {
             return ResponseEntity.badRequest().body("CEP inválido.");
         }
 
+        // Validação do CPF do responsável legal, se fornecido
+        if (request.responsavelLegalCpf() != null && !Validadores.isCpfValido(request.responsavelLegalCpf())) {
+            return ResponseEntity.badRequest().body("CPF do responsável legal inválido.");
+        }
+
         Contratante contratante = new Contratante();
         contratante.setCnpj(request.cnpj());
         contratante.setRazaoSocial(request.razaoSocial());
@@ -69,13 +72,19 @@ public class ContratanteController {
         contratante.setSite(request.site());
         contratante.setDataFundacao(request.dataFundacao());
         contratante.setTelefone(request.telefone());
+        contratante.setTelefoneFixo(request.telefoneFixo());
         contratante.setCep(request.cep());
         contratante.setBairro(request.bairro());
-        contratante.setNumeroDaCasa(request.numeroDaCasa());
         contratante.setRua(request.rua());
+        contratante.setCidade(request.cidade());
         contratante.setEstado(request.estado());
         contratante.setBanco(request.banco());
         contratante.setAgencia(request.agencia());
+
+        contratante.setResponsavelLegalCpf(request.responsavelLegalCpf());
+        contratante.setResponsavelLegalNome(request.responsavelLegalNome());
+        contratante.setResponsavelLegalTelefone(request.responsavelLegalTelefone());
+        contratante.setResponsavelLegalEmail(request.responsavelLegalEmail());
 
         Contratante saved = contratanteService.salvar(contratante);
         return ResponseEntity.ok(saved);
@@ -99,6 +108,10 @@ public class ContratanteController {
             return ResponseEntity.badRequest().body("CEP inválido.");
         }
 
+        if (request.responsavelLegalCpf() != null && !Validadores.isCpfValido(request.responsavelLegalCpf())) {
+            return ResponseEntity.badRequest().body("CPF do responsável legal inválido.");
+        }
+
         return contratanteService.buscarPorId(id)
                 .map(contratante -> {
                     contratante.setCnpj(request.cnpj());
@@ -110,13 +123,19 @@ public class ContratanteController {
                     contratante.setSite(request.site());
                     contratante.setDataFundacao(request.dataFundacao());
                     contratante.setTelefone(request.telefone());
+                    contratante.setTelefoneFixo(request.telefoneFixo());
                     contratante.setCep(request.cep());
                     contratante.setBairro(request.bairro());
-                    contratante.setNumeroDaCasa(request.numeroDaCasa());
                     contratante.setRua(request.rua());
+                    contratante.setCidade(request.cidade());
                     contratante.setEstado(request.estado());
                     contratante.setBanco(request.banco());
                     contratante.setAgencia(request.agencia());
+
+                    contratante.setResponsavelLegalCpf(request.responsavelLegalCpf());
+                    contratante.setResponsavelLegalNome(request.responsavelLegalNome());
+                    contratante.setResponsavelLegalTelefone(request.responsavelLegalTelefone());
+                    contratante.setResponsavelLegalEmail(request.responsavelLegalEmail());
 
                     Contratante atualizado = contratanteService.salvar(contratante);
                     return ResponseEntity.ok(atualizado);
@@ -124,4 +143,11 @@ public class ContratanteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Listar contratantes com número de contratos ativos",
+            description = "Retorna uma lista de contratantes com nome, CNPJ e quantidade de contratos ativos.")
+    @GetMapping("/resumo")
+    public ResponseEntity<List<ContratanteResumoDTO>> listarResumoComContratosAtivos() {
+        List<ContratanteResumoDTO> resumo = contratanteService.listarResumoComContratosAtivos();
+        return ResponseEntity.ok(resumo);
+    }
 }

@@ -2,6 +2,7 @@ package com.getinfo.gestaocontratual.repository;
 import com.getinfo.gestaocontratual.entities.Contrato;
 import com.getinfo.gestaocontratual.entities.Entregaveis;
 
+import com.getinfo.gestaocontratual.entities.StatusEntregavel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface EntregaveisRepository extends JpaRepository<Entregaveis, Long> 
     List<Entregaveis> findByIdContrato_IdContrato(Long idContrato);
     void deleteAllByIdContrato_IdContrato(Long idContrato);
     List<Entregaveis> findByDtFimBetween(LocalDate dtInicio, LocalDate dtFinal);
+    List<Entregaveis> findByStatus(StatusEntregavel status);
+
 }

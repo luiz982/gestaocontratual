@@ -97,6 +97,7 @@ public class ContratoController {
         contrato.setResponsavel(dto.responsavel());
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
+        contrato.setTipoServico(dto.tipoServico());
         contrato = contratoRepository.save(contrato);
         if (dto.entregaveis() != null) {
             for (var e : dto.entregaveis()) {
@@ -301,6 +302,7 @@ public class ContratoController {
         contratoResponse.setResponsavel(contrato.getResponsavel());
         contratoResponse.setStatus(contrato.getStatus() != null ? contrato.getStatus().getNome() : null);
         contratoResponse.setTipoContrato(contrato.getTipoContrato());
+        contratoResponse.setTipoServico(contrato.getTipoServico());
         contratoResponse.setEntregaveis(listaEntregaveisDetalhe);
         contratoResponse.setPostosTrabalho(postosTrabalhoResponseList);
         contratoResponse.setDocumentos(documentosResponseList);
@@ -356,6 +358,7 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setStatus(status);
         contrato.setTipoContrato(dto.tipoContrato());
+        contrato.setTipoServico(dto.tipoServico());
         contrato.setResponsavel(dto.responsavel());
         contrato = contratoRepository.save(contrato);
 

@@ -4,6 +4,7 @@ import java.util.Base64;
 import java.util.Date;
 
 import br.com.caelum.stella.validation.CNPJValidator;
+import br.com.caelum.stella.validation.CPFValidator;
 import br.com.caelum.stella.validation.InvalidStateException;
 
 public class Validadores {
@@ -16,6 +17,20 @@ public class Validadores {
         try {
             CNPJValidator validator = new CNPJValidator();
             validator.assertValid(cnpj);
+            return true;
+        } catch (InvalidStateException e) {
+            return false;
+        }
+    }
+
+    public static boolean isCpfValido(String cpf) {
+        if (cpf == null || cpf.isBlank()) {
+            return false;
+        }
+
+        try {
+            CPFValidator validator = new CPFValidator();
+            validator.assertValid(cpf);
             return true;
         } catch (InvalidStateException e) {
             return false;

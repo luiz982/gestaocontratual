@@ -31,7 +31,10 @@ public class Contrato {
     private Date dtAlteracao;
 
     @Column(nullable = false)
-    private String tipoContrato;
+    private TipoContrato tipoContrato;
+
+    @Column
+    private String tipoServico;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.DATE)
@@ -67,6 +70,10 @@ public class Contrato {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getTipoServico() { return tipoServico; }
+
+    public void setTipoServico(String tipoServico) { this.tipoServico = tipoServico; }
 
     public Long getIdContrato() {
         return idContrato;
@@ -120,11 +127,11 @@ public class Contrato {
 
     public void setStatus(Status status) { this.status = status; }
 
-    public String getTipoContrato() {
+    public TipoContrato getTipoContrato() {
         return tipoContrato;
     }
 
-    public void setTipoContrato(String tipoContrato) {
+    public void setTipoContrato(TipoContrato tipoContrato) {
         this.tipoContrato = tipoContrato;
     }
 

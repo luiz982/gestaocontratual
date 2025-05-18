@@ -15,7 +15,8 @@ public class ContratoResponse {
     private Date dtAlteracao;
     private Integer idContratante;
     private String status;
-    private String tipoContrato;
+    private TipoContrato tipoContrato;
+    private String tipoServico;
     private String responsavel;
     private List<EntregaveisResponse> entregaveis;
     private List<PostoTrabalhoResponse> postosTrabalho;
@@ -103,12 +104,20 @@ public class ContratoResponse {
         this.status = status;
     }
 
-    public String getTipoContrato() {
+    public TipoContrato getTipoContrato() {
         return tipoContrato;
     }
 
-    public void setTipoContrato(String tipoContrato) {
+    public void setTipoContrato(TipoContrato tipoContrato) {
         this.tipoContrato = tipoContrato;
+    }
+
+    public String getTipoServico() {
+        return tipoServico;
+    }
+
+    public void setTipoServico(String tipoServico) {
+        this.tipoServico = tipoServico;
     }
 
     public List<EntregaveisResponse> getEntregaveis() {
