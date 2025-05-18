@@ -52,6 +52,7 @@ public class ContratanteService {
                     long contratosAtivos = contratoRepository.countAtivosByContratante(contratante);
 
                     return new ContratanteResumoDTO(
+                            contratante.getIdContratante(),
                             contratante.getNomeFantasia(),
                             contratante.getCnpj(),
                             contratosAtivos
