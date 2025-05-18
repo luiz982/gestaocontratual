@@ -77,9 +77,6 @@ public class Contratante {
     @Column
     private String responsavelLegalEmail;
 
-    @OneToMany(mappedBy = "idContratante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Contrato> contratos;
-
 
     // Getters e Setters
     public Integer getIdContratante() {
@@ -258,11 +255,4 @@ public class Contratante {
         this.responsavelLegalEmail = responsavelLegalEmail;
     }
 
-    public List<Contrato> getContratos() {
-        return contratos;
-    }
-
-    public void setContratos(List<Contrato> contratos) {
-        this.contratos = contratos;
-    }
 }
