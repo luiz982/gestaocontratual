@@ -14,7 +14,7 @@ public class Entregaveis {
     private Long idEntregavel;
 
     @ManyToOne
-    @JoinColumn(name = "id_contrato", referencedColumnName = "id_contrato", nullable = false)
+    @JoinColumn(name = "id_contrato", referencedColumnName = "id_contrato")
     private Contrato idContrato;
 
     @Column(name = "Nome", length = 100)
@@ -32,6 +32,9 @@ public class Entregaveis {
     @Column(name = "Status")
     private StatusEntregavel status;
 
+    @Column(name= "descricao")
+    String descricao;
+
     public Contrato getIdContrato() {
         return idContrato;
     }
@@ -40,9 +43,16 @@ public class Entregaveis {
         this.idContrato = idContrato;
     }
 
-    // Getters e Setters
     public Long getIdEntregavel() {
         return idEntregavel;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public void setIdEntregavel(Long idEntregavel) {
