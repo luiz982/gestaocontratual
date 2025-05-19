@@ -6,7 +6,7 @@ import com.getinfo.gestaocontratual.repository.*;
 import com.getinfo.gestaocontratual.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,7 +50,7 @@ public class ContratoController {
     }
 
     @Operation(summary = "Cadastro de contrato")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "/criarContrato", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> criarContrato(@RequestPart("contrato") CreateContratoRequest dto,
                                                 @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
@@ -312,7 +312,7 @@ public class ContratoController {
     }
 
     @Operation(summary = "Atualiza um contrato")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarContrato(@PathVariable Long id,
                                                @RequestPart("contrato") CreateContratoRequest dto,
