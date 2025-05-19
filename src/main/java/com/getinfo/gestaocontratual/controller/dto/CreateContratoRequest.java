@@ -1,7 +1,7 @@
 package com.getinfo.gestaocontratual.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.getinfo.gestaocontratual.controller.dto.AlteraEntregaveisRequest;
+import com.getinfo.gestaocontratual.controller.dto.*;
 import com.getinfo.gestaocontratual.controller.dto.AlteraPostosTrabalhoRequest;
 import com.getinfo.gestaocontratual.entities.TipoContrato;
 
@@ -19,6 +19,6 @@ public record CreateContratoRequest(
         Long idContratante,
         String responsavel,
         List<AlteraPostosTrabalhoRequest> postos,
-        List<CreateEntregaveisRequest> entregaveis,
+        List<CreateEntregaveisContratoRequest> entregaveis,
         List<ContratoColaboradorRequest> colaboradores
 ) {}

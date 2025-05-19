@@ -120,7 +120,7 @@ public class ContratoController {
                     entregavel.setDtInicio(e.dtInicio());
                     entregavel.setDtFim(e.dtFim());
                     entregavel.setStatus(e.Status());
-
+                    entregavel.setDescricao(e.descricao());
                     entregavel.setColaboradores(new ArrayList<>());
 
                     if (e.colaboradores() != null && !e.colaboradores().isEmpty()) {
@@ -275,6 +275,7 @@ public class ContratoController {
                             entregavel.getDtInicio(),
                             entregavel.getDtFim(),                    
                             entregavel.getStatus(),
+                            entregavel.getDescricao(),
                             colaboradoresEntregaveisResponse
                     );
                     listaEntregaveisDetalhe.add(resposta);
@@ -385,7 +386,7 @@ public class ContratoController {
                     entregavel.setDtInicio(e.dtInicio());
                     entregavel.setDtFim(e.dtFim());
                     entregavel.setStatus(e.Status());
-
+                    entregavel.setDescricao(e.descricao());
                     entregavel.setColaboradores(new ArrayList<>());
 
                     if (e.colaboradores() != null && !e.colaboradores().isEmpty()) {
