@@ -79,6 +79,7 @@ public class EntregaveisController {
                             entregavel.getDtInicio(),
                             entregavel.getDtFim(),                    
                             entregavel.getStatus(),
+                            entregavel.getDescricao(),
                             colaboradoresEntregaveisResponse
                     );
                     listaEntregaveisDetalhe.add(resposta);
