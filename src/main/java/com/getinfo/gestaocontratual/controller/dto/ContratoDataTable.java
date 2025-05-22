@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class ContratoResponse {
+public class ContratoDataTable {
     private Long idContrato;
     private Long numContrato;
     private Date dtInicio;
@@ -18,13 +18,9 @@ public class ContratoResponse {
     private TipoContrato tipoContrato;
     private String tipoServico;
     private String responsavel;
-    private List<EntregaveisResponse> entregaveis;
-    private List<PostoTrabalhoResponse> postosTrabalho;
-    private List<DocumentoResponse> documentos;
     private Contratante contratante;
-    private List<ColaboradorResponse> colaborador;
 
-    public ContratoResponse(Long idContrato, Long numContrato, Date dtInicio, Date dtFim, Date dtAlteracao, Integer idContratante, String status, TipoContrato tipoContrato, String tipoServico, String responsavel, List<EntregaveisResponse> entregaveis, List<PostoTrabalhoResponse> postosTrabalho, List<DocumentoResponse> documentos, Contratante contratante, List<ColaboradorResponse> colaborador) {
+    public ContratoDataTable(Long idContrato, Long numContrato, Date dtInicio, Date dtFim, Date dtAlteracao, Integer idContratante, String status, TipoContrato tipoContrato, String tipoServico, String responsavel, Contratante contratante) {
         this.idContrato = idContrato;
         this.numContrato = numContrato;
         this.dtInicio = dtInicio;
@@ -35,20 +31,9 @@ public class ContratoResponse {
         this.tipoContrato = tipoContrato;
         this.tipoServico = tipoServico;
         this.responsavel = responsavel;
-        this.entregaveis = entregaveis;
-        this.postosTrabalho = postosTrabalho;
-        this.documentos = documentos;
         this.contratante = contratante;
-        this.colaborador = colaborador;
     }
 
-    public List<ColaboradorResponse> getColaborador() {
-        return colaborador;
-    }
-
-    public void setColaborador(List<ColaboradorResponse> colaborador) {
-        this.colaborador = colaborador;
-    }
 
     public Contratante getContratante() {
         return contratante;
@@ -138,27 +123,4 @@ public class ContratoResponse {
         this.tipoServico = tipoServico;
     }
 
-    public List<EntregaveisResponse> getEntregaveis() {
-        return entregaveis;
-    }
-
-    public void setEntregaveis(List<EntregaveisResponse> entregaveis) {
-        this.entregaveis = entregaveis;
-    }
-
-    public List<PostoTrabalhoResponse> getPostosTrabalho() {
-        return postosTrabalho;
-    }
-
-    public void setPostosTrabalho(List<PostoTrabalhoResponse> postosTrabalho) {
-        this.postosTrabalho = postosTrabalho;
-    }
-
-    public List<DocumentoResponse> getDocumentos() {
-        return documentos;
-    }
-
-    public void setDocumentos(List<DocumentoResponse> documentos) {
-        this.documentos = documentos;
-    }
 }

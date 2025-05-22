@@ -2,6 +2,7 @@ package com.getinfo.gestaocontratual.repository;
 
 import com.getinfo.gestaocontratual.entities.Contratante;
 import com.getinfo.gestaocontratual.entities.Contrato;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,8 @@ public interface ContratoRepository  extends JpaRepository<Contrato, Long> {
     List<Contrato> findAllAtivos();
     @Query("SELECT MONTH(c.createdAt), COUNT(c) FROM Contrato c WHERE YEAR(c.createdAt) = :ano GROUP BY MONTH(c.createdAt)")
     List<Object[]> countContratosPorMes(@Param("ano") int ano);
+
+    List<Contrato> findAll();
 
     long countByStatus_NomeIgnoreCase(String nome);
 
