@@ -3,8 +3,7 @@ package com.getinfo.gestaocontratual.entities;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "contratos")
@@ -48,19 +47,68 @@ public class Contrato {
     @Column(nullable = false)
     private String responsavel;
 
-    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContratoColaborador> colaboradores;
+    @ManyToMany
+    @JoinTable(
+            name = "contrato_colaborador",
+            joinColumns = @JoinColumn(name = "id_contrato"),
+            inverseJoinColumns = @JoinColumn(name = "id_colaborador")
+    )
+    private Set<Colaborador> colaboradores = new HashSet<>();
+
+    @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Entregaveis> entregaveis;
+
+    @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostoTrabalho> postos;
+
+    @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Documentos> documentos;
 
     @ManyToOne
     @JoinColumn(name = "id_status", referencedColumnName = "id_status")
     private Status status;
 
-    public List<ContratoColaborador> getColaboradores() {
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContratoColaborador> contratoColaboradores = new ArrayList<>();
+
+    public List<ContratoColaborador> getContratoColaboradores() {
+        return contratoColaboradores;
+    }
+
+    public void setContratoColaboradores(List<ContratoColaborador> contratoColaboradores) {
+        this.contratoColaboradores = contratoColaboradores;
+    }
+
+    public Set<Colaborador> getColaboradores() {
         return colaboradores;
     }
 
-    public void setColaboradores(List<ContratoColaborador> colaboradores) {
+    public void setColaboradores(Set<Colaborador> colaboradores) {
         this.colaboradores = colaboradores;
+    }
+
+    public List<Entregaveis> getEntregaveis() {
+        return entregaveis;
+    }
+
+    public void setEntregaveis(List<Entregaveis> entregaveis) {
+        this.entregaveis = entregaveis;
+    }
+
+    public List<PostoTrabalho> getPostos() {
+        return postos;
+    }
+
+    public void setPostos(List<PostoTrabalho> postos) {
+        this.postos = postos;
+    }
+
+    public List<Documentos> getDocumentos() {
+        return documentos;
+    }
+
+    public void setDocumentos(List<Documentos> documentos) {
+        this.documentos = documentos;
     }
 
     public Date getCreatedAt() {
