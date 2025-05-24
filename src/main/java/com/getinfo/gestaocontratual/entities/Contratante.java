@@ -58,6 +58,14 @@ public class Contratante {
     @Column
     private String estado;
 
+    // NOVO CAMPO REGIÃO
+    @Column
+    private String regiao;
+
+    // NOVO CAMPO TIPO EMPRESA (0 = Privada, 1 = Pública)
+    @Column
+    private Integer tipoEmpresa;
+
     @Column
     private String banco;
 
@@ -77,8 +85,58 @@ public class Contratante {
     @Column
     private String responsavelLegalEmail;
 
+    // Método que calcula a regiã automaticamente antes de salvar/atualizaro
+    @PrePersist
+    @PreUpdate
+    public void calcularRegiao() {
+        this.regiao = determinarRegiaoPorEstado(this.estado);
+    }
 
-    // Getters e Setters
+    // Método privado para determinar região baseada no estado
+    private String determinarRegiaoPorEstado(String estado) {
+        if (estado == null || estado.trim().isEmpty()) {
+            return null;
+        }
+
+        switch (estado.toUpperCase().trim()) {
+            // Norte
+            case "AC": case "AP": case "AM": case "PA":
+            case "RO": case "RR": case "TO":
+                return "Norte";
+
+            // Nordeste
+            case "AL": case "BA": case "CE": case "MA":
+            case "PB": case "PE": case "PI": case "RN": case "SE":
+                return "Nordeste";
+
+            // Centro-Oeste
+            case "GO": case "MT": case "MS": case "DF":
+                return "Centro-Oeste";
+
+            // Sudeste
+            case "ES": case "MG": case "RJ": case "SP":
+                return "Sudeste";
+
+            // Sul
+            case "PR": case "RS": case "SC":
+                return "Sul";
+
+            default:
+                return null;
+        }
+    }
+
+    // Método utilitário para verificar se é empresa pública
+    public boolean isEmpresaPublica() {
+        return tipoEmpresa != null && tipoEmpresa == 1;
+    }
+
+    // Método utilitário para verificar se é empresa privada
+    public boolean isEmpresaPrivada() {
+        return tipoEmpresa != null && tipoEmpresa == 0;
+    }
+
+    // Getters e Setters existentes
     public Integer getIdContratante() {
         return idContratante;
     }
@@ -207,6 +265,24 @@ public class Contratante {
         this.estado = estado;
     }
 
+    // GETTER E SETTER PARA REGIÃO
+    public String getRegiao() {
+        return regiao;
+    }
+
+    public void setRegiao(String regiao) {
+        this.regiao = regiao;
+    }
+
+    // GETTER E SETTER PARA TIPO EMPRESA
+    public Integer getTipoEmpresa() {
+        return tipoEmpresa;
+    }
+
+    public void setTipoEmpresa(Integer tipoEmpresa) {
+        this.tipoEmpresa = tipoEmpresa;
+    }
+
     public String getBanco() {
         return banco;
     }
@@ -254,5 +330,4 @@ public class Contratante {
     public void setResponsavelLegalEmail(String responsavelLegalEmail) {
         this.responsavelLegalEmail = responsavelLegalEmail;
     }
-
 }

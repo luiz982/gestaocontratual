@@ -22,19 +22,20 @@ public class UtilController {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Operation(summary = "Retorna todos os estados do brasil e seus respectivos IDs")
+    @Operation(summary = "Retorna todos os estados do brasil e seus respectivos IDs e siglas")
     @GetMapping("/estados")
     public ResponseEntity<?> getEstados() {
         try {
             String url = "http://servicodados.ibge.gov.br/api/v1/localidades/estados";
             String response = restTemplate.getForObject(url, String.class);
-            List<Map<String, Object>> estados = objectMapper.readValue(response, new TypeReference<>() {
-            });
+            List<Map<String, Object>> estados = objectMapper.readValue(response, new TypeReference<>() {});
 
             List<Map<String, Object>> estadosFiltrados = estados.stream()
                     .map(estado -> Map.of(
                             "id", estado.get("id"),
-                            "nome", estado.get("nome")))
+                            "nome", estado.get("nome"),
+                            "sigla", estado.get("sigla")
+                    ))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(new UtilResponse("Dados recuperados com sucesso", estadosFiltrados));

@@ -31,4 +31,7 @@ public interface ContratoRepository  extends JpaRepository<Contrato, Long> {
 
     @Query("SELECT COUNT(c) FROM Contrato c WHERE c.idContratante = :contratante AND LOWER(c.status.nome) <> 'arquivado'")
     long countAtivosByContratante(@Param("contratante") Contratante contratante);
+
+    @Query("SELECT c.idContratante.regiao, COUNT(c) FROM Contrato c GROUP BY c.idContratante.regiao")
+    List<Object[]> countContratosPorRegiao();
 }

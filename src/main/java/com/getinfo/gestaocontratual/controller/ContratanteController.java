@@ -62,6 +62,14 @@ public class ContratanteController {
             return ResponseEntity.badRequest().body("CPF do responsável legal inválido.");
         }
 
+        if (request.emailCorporativo() != null && !Validadores.isEmailValido(request.emailCorporativo())) {
+            return ResponseEntity.badRequest().body("E-mail corporativo inválido.");
+        }
+
+        if (request.responsavelLegalEmail() != null && !Validadores.isEmailValido(request.responsavelLegalEmail())) {
+            return ResponseEntity.badRequest().body("E-mail do responsável legal inválido.");
+        }
+
         Contratante contratante = new Contratante();
         contratante.setCnpj(request.cnpj());
         contratante.setRazaoSocial(request.razaoSocial());
@@ -78,6 +86,7 @@ public class ContratanteController {
         contratante.setRua(request.rua());
         contratante.setCidade(request.cidade());
         contratante.setEstado(request.estado());
+        contratante.setTipoEmpresa(request.tipoEmpresa());
         contratante.setBanco(request.banco());
         contratante.setAgencia(request.agencia());
 
@@ -129,6 +138,7 @@ public class ContratanteController {
                     contratante.setRua(request.rua());
                     contratante.setCidade(request.cidade());
                     contratante.setEstado(request.estado());
+                    contratante.setTipoEmpresa(request.tipoEmpresa());
                     contratante.setBanco(request.banco());
                     contratante.setAgencia(request.agencia());
 
