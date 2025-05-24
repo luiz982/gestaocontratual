@@ -24,26 +24,16 @@ public class ContratoController {
     private final ContratoRepository contratoRepository;
     private final ContratanteRepository contratanteRepository;
     private final StatusRepository statusRepository;
-    private final DocumentoRepository documentoRepository;
-    private final PostoTrabalhoRepository postoTrabalhoRepository;
-    private final EntregaveisRepository entregaveisRepository;
     private final DocumentoService documentoService;
     private final ColaboradorRepository colaboradorRepository;
-    private final ContratoColaboradorRepository contratoColaboradorRepository;
-    private final EntregaveisColaboradorRepository entregaveisColaboradorRepository;
 
     @Autowired
-    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, PostoTrabalhoRepository postoTrabalhoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository, ContratoColaboradorRepository contratoColaboradorRepository, EntregaveisColaboradorRepository entregaveisColaboradorRepository) {
+    public ContratoController(ContratoRepository contratoRepository, ContratanteRepository contratanteRepository, StatusRepository statusRepository, DocumentoRepository documentoRepository, EntregaveisRepository entregaveisRepository, DocumentoService documentoService, ColaboradorRepository colaboradorRepository, ContratoColaboradorRepository contratoColaboradorRepository, EntregaveisColaboradorRepository entregaveisColaboradorRepository) {
         this.contratoRepository = contratoRepository;
         this.contratanteRepository = contratanteRepository;
         this.statusRepository = statusRepository;
-        this.documentoRepository = documentoRepository;
-        this.postoTrabalhoRepository = postoTrabalhoRepository;
-        this.entregaveisRepository = entregaveisRepository;
         this.documentoService = documentoService;
         this.colaboradorRepository = colaboradorRepository;
-        this.contratoColaboradorRepository = contratoColaboradorRepository;
-        this.entregaveisColaboradorRepository = entregaveisColaboradorRepository;
     }
 
     @Operation(summary = "Cadastro de contrato")
@@ -61,7 +51,14 @@ public class ContratoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: A data de início não pode ser vazia.");
         }
 
-        Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
+        Status status = statusRepository.findByNomeIgnoreCase("Ativo");
+
+        if (status == null) {
+            status = new Status();
+            status.setNome("Ativo");
+            status.setDescricao("Contrato ativo!");
+            statusRepository.save(status);
+        }
 
         Contrato contrato = new Contrato();
         contrato.setNumContrato(dto.numContrato());
@@ -70,7 +67,6 @@ public class ContratoController {
         contrato.setIdContratante(contratante);
         contrato.setResponsavel(dto.responsavel());
         contrato.setStatus(status);
-        contrato.setTipoContrato(dto.tipoContrato());
         contrato.setTipoServico(dto.tipoServico());
 
         if (dto.colaboradores() != null) {
@@ -84,8 +80,7 @@ public class ContratoController {
             }
             contrato.setColaboradores(colaboradoresSet);
         }
-
-        if (dto.entregaveis() != null) {
+        if (dto.entregaveis() != null && dto.entregaveis().toArray().length != 0) {
             List<Entregaveis> entregaveisList = new ArrayList<>();
             for (var e : dto.entregaveis()) {
                 if (e.nome() == null || e.nome().isBlank()) {
@@ -102,7 +97,17 @@ public class ContratoController {
                 entregavel.setNome(e.nome());
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
-                entregavel.setStatus(e.Status());
+                if (e.Status() != null && !e.Status().isBlank() && !e.Status().isEmpty()) {
+                    try {
+                        entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
+                    } catch (IllegalArgumentException ex) {
+                        return ResponseEntity.badRequest()
+                                .body("Erro: Status inválido para o entregável: " + e.nome());
+                    }
+                } else {
+                    return ResponseEntity.badRequest()
+                            .body("Erro: Status inválido para o entregável: " + e.nome());
+                }
                 entregavel.setDescricao(e.descricao());
                 entregavel.setIdContrato(contrato);
 
@@ -126,21 +131,6 @@ public class ContratoController {
                 entregaveisList.add(entregavel);
             }
             contrato.setEntregaveis(entregaveisList);
-        }
-
-        if (dto.postos() != null) {
-            List<PostoTrabalho> postosList = new ArrayList<>();
-            for (var p : dto.postos()) {
-                if (p.nome() == null || p.nome().isBlank()) {
-                    return ResponseEntity.badRequest().body("Erro: Nome do posto de trabalho é obrigatório.");
-                }
-                PostoTrabalho posto = new PostoTrabalho();
-                posto.setNome(p.nome());
-                posto.setDescricao(p.descricao());
-                posto.setIdContrato(contrato);
-                postosList.add(posto);
-            }
-            contrato.setPostos(postosList);
         }
 
         if (documentos != null && documentos.length > 0) {
@@ -265,14 +255,6 @@ public class ContratoController {
                 })
                 .toList();
 
-        List<PostoTrabalhoResponse> postos = contrato.getPostos().stream()
-                .map(p -> new PostoTrabalhoResponse(
-                        p.getId(),
-                        p.getNome(),
-                        p.getDescricao()
-                ))
-                .toList();
-
         List<DocumentoResponse> documentos = contrato.getDocumentos().stream()
                 .map(d -> new DocumentoResponse(
                         d.getIdDocumento(),
@@ -289,11 +271,9 @@ public class ContratoController {
                 contrato.getDtAlteracao(),
                 contrato.getIdContratante().getIdContratante(),
                 contrato.getStatus().getNome(),
-                contrato.getTipoContrato(),
                 contrato.getTipoServico(),
                 contrato.getResponsavel(),
                 entregaveis,
-                postos,
                 documentos,
                 contrato.getIdContratante(),
                 colaboradores
@@ -304,9 +284,8 @@ public class ContratoController {
     @Transactional(rollbackFor = Exception.class)
     @PutMapping(value = "/atualizarContrato/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> atualizarContrato(@PathVariable Long id,
-                                                    @RequestPart("contrato") CreateContratoRequest dto,
+                                                    @RequestPart("contrato") AlteraContratoRequest dto,
                                                     @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
-
         Optional<Contrato> contratoOpt = contratoRepository.findById(id);
         if (contratoOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado para ID: " + id);
@@ -316,40 +295,40 @@ public class ContratoController {
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Contratante não encontrado!");
+            return ResponseEntity.badRequest().body("Erro: Contratante não encontrado!");
         }
 
         if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: A data de início não pode ser vazia.");
+            return ResponseEntity.badRequest().body("Erro: A data de início não pode ser vazia.");
         }
 
         Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
 
         contrato.setNumContrato(dto.numContrato());
-        contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
-        contrato.setIdContratante(contratante);
+        contrato.setDtFim(dto.dtFim());
         contrato.setResponsavel(dto.responsavel());
-        contrato.setStatus(status);
-        contrato.setTipoContrato(dto.tipoContrato());
         contrato.setTipoServico(dto.tipoServico());
+        contrato.setIdContratante(contratante);
+        contrato.setStatus(status);
 
+        contrato.getContratoColaboradores().clear();
         if (dto.colaboradores() != null) {
-            Set<Colaborador> colaboradoresSet = new HashSet<>();
             for (var c : dto.colaboradores()) {
                 Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
                 if (colaboradorOpt.isEmpty()) {
                     return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
                 }
-                colaboradoresSet.add(colaboradorOpt.get());
+                ContratoColaborador relacao = new ContratoColaborador();
+                relacao.setColaborador(colaboradorOpt.get());
+                relacao.setContrato(contrato);
+                relacao.setFuncaoContrato(c.funcaoContrato());
+                contrato.getContratoColaboradores().add(relacao);
             }
-            contrato.setColaboradores(colaboradoresSet);
-        } else {
-            contrato.getColaboradores().clear();
         }
 
+        contrato.getEntregaveis().clear();
         if (dto.entregaveis() != null) {
-            List<Entregaveis> entregaveisList = new ArrayList<>();
             for (var e : dto.entregaveis()) {
                 if (e.nome() == null || e.nome().isBlank()) {
                     return ResponseEntity.badRequest().body("Erro: Nome do entregável é obrigatório.");
@@ -358,101 +337,68 @@ public class ContratoController {
                     return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
                 }
                 if (e.dtFim() != null && e.dtInicio().after(e.dtFim())) {
-                    return ResponseEntity.badRequest().body("Erro: Data de início maior que a data de fim no entregável: " + e.nome());
+                    return ResponseEntity.badRequest().body("Erro: Data de início maior que fim no entregável: " + e.nome());
                 }
 
                 Entregaveis entregavel = new Entregaveis();
+                entregavel.setIdContrato(contrato);
                 entregavel.setNome(e.nome());
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
-                entregavel.setStatus(e.Status());
                 entregavel.setDescricao(e.descricao());
-                entregavel.setIdContrato(contrato);
 
-                if (e.colaboradores() != null && !e.colaboradores().isEmpty()) {
-                    List<EntregaveisColaborador> entregaveisColaboradores = new ArrayList<>();
+                try {
+                    entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
+                } catch (IllegalArgumentException ex) {
+                    return ResponseEntity.badRequest().body("Status inválido para entregável: " + e.nome());
+                }
+
+                List<EntregaveisColaborador> relacoes = new ArrayList<>();
+                if (e.colaboradores() != null) {
                     for (var c : e.colaboradores()) {
-                        Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
-                        if (colaboradorOpt.isEmpty()) {
-                            return ResponseEntity.badRequest()
-                                    .body("Colaborador com ID " + c.id() + " não encontrado para o entregável " + e.nome());
+                        Optional<Colaborador> colabOpt = colaboradorRepository.findById(c.id());
+                        if (colabOpt.isEmpty()) {
+                            return ResponseEntity.badRequest().body("Colaborador ID " + c.id() + " não encontrado no entregável " + e.nome());
                         }
                         EntregaveisColaborador relacao = new EntregaveisColaborador();
-                        relacao.setColaborador(colaboradorOpt.get());
+                        relacao.setColaborador(colabOpt.get());
                         relacao.setFuncaoEntregavel(c.funcaoEntregavel());
                         relacao.setEntregavel(entregavel);
-                        entregaveisColaboradores.add(relacao);
+                        relacoes.add(relacao);
                     }
-                    entregavel.setColaboradores(entregaveisColaboradores);
                 }
 
-                entregaveisList.add(entregavel);
+                entregavel.setColaboradores(relacoes);
+                contrato.getEntregaveis().add(entregavel);
             }
-            contrato.setEntregaveis(entregaveisList);
-        } else {
-            contrato.getEntregaveis().clear();
         }
 
-        if (dto.postos() != null) {
-            List<PostoTrabalho> postosList = new ArrayList<>();
-            for (var p : dto.postos()) {
-                if (p.nome() == null || p.nome().isBlank()) {
-                    return ResponseEntity.badRequest().body("Erro: Nome do posto de trabalho é obrigatório.");
-                }
-                PostoTrabalho posto = new PostoTrabalho();
-                posto.setNome(p.nome());
-                posto.setDescricao(p.descricao());
-                posto.setIdContrato(contrato);
-                postosList.add(posto);
-            }
-            contrato.setPostos(postosList);
-        } else {
-            contrato.getPostos().clear();
-        }
-
+        contrato.getDocumentos().clear();
         if (documentos != null && documentos.length > 0) {
-            List<Documentos> documentosList = contrato.getDocumentos() != null
-                    ? new ArrayList<>(contrato.getDocumentos())
-                    : new ArrayList<>();
-
             for (MultipartFile file : documentos) {
-                if (file != null && !file.isEmpty()) {
+                if (!file.isEmpty()) {
                     String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                     try {
                         documentoService.uploadFile(fileName, file);
                         String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/documentos/" + fileName;
 
-                        Documentos documento = new Documentos();
-                        documento.setNome(file.getOriginalFilename());
-                        documento.setUrl(fileUrl);
-                        documento.setContrato(contrato);
-
-                        documentosList.add(documento);
+                        Documentos doc = new Documentos();
+                        doc.setNome(file.getOriginalFilename());
+                        doc.setUrl(fileUrl);
+                        doc.setContrato(contrato);
+                        contrato.getDocumentos().add(doc);
                     } catch (IOException e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Erro ao fazer upload do documento: " + e.getMessage());
+                        throw new RuntimeException("Erro ao fazer upload do documento: " + e.getMessage());
                     }
                 }
             }
-            contrato.setDocumentos(documentosList);
         }
 
-        try {
-            contratoRepository.save(contrato);
-        } catch (Exception e) {
-            if (contrato.getDocumentos() != null) {
-                for (Documentos doc : contrato.getDocumentos()) {
-                    try {
-                        documentoService.deleteFile(doc.getUrl());
-                    } catch (Exception ignored) { }
-                }
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao atualizar o contrato: " + e.getMessage());
-        }
+        contratoRepository.save(contrato);
 
         return ResponseEntity.ok("Contrato atualizado com sucesso. ID: " + contrato.getIdContrato());
     }
+
 
 
     @Operation(summary = "Deleta um contrato")
@@ -567,7 +513,6 @@ public class ContratoController {
                 contrato.getDtAlteracao(),
                 contrato.getIdContratante().getIdContratante(),
                 contrato.getStatus().getNome(),
-                contrato.getTipoContrato(),
                 contrato.getTipoServico(),
                 contrato.getResponsavel(),
                 contrato.getIdContratante()

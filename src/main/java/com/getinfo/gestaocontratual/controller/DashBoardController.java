@@ -68,5 +68,21 @@ public class DashBoardController {
         return ResponseEntity.ok(proximos);
     }
 
+    @GetMapping("/dashboard/contratos-por-regiao")
+    public ResponseEntity<List<Map<String, Object>>> contratosPorRegiao() {
+        List<Object[]> resultados = contratoRepository.countContratosPorRegiao();
+        List<Map<String, Object>> lista = new ArrayList<>();
+
+        for (Object[] obj : resultados) {
+            if (obj[0] != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("regiao", obj[0]);
+                map.put("total", obj[1]);
+                lista.add(map);
+            }
+        }
+        return ResponseEntity.ok(lista);
+    }
+
 
 }

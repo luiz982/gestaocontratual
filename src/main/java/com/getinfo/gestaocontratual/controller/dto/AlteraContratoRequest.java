@@ -6,12 +6,13 @@ import com.getinfo.gestaocontratual.entities.TipoContrato;
 import java.util.Date;
 import java.util.List;
 
-public record CreateContratoRequest(
+public record AlteraContratoRequest(
         Long numContrato,
         @JsonFormat(pattern = "yyyy-MM-dd")
         Date dtInicio,
         @JsonFormat(pattern = "yyyy-MM-dd")
         Date dtFim,
+        Long idStatus,
         String tipoServico,
         Long idContratante,
         String responsavel,

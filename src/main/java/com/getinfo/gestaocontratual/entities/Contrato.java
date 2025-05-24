@@ -29,9 +29,6 @@ public class Contrato {
     @Temporal(TemporalType.DATE)
     private Date dtAlteracao;
 
-    @Column(nullable = false)
-    private TipoContrato tipoContrato;
-
     @Column
     private String tipoServico;
 
@@ -58,8 +55,6 @@ public class Contrato {
     @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Entregaveis> entregaveis;
 
-    @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostoTrabalho> postos;
 
     @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documentos> documentos;
@@ -93,14 +88,6 @@ public class Contrato {
 
     public void setEntregaveis(List<Entregaveis> entregaveis) {
         this.entregaveis = entregaveis;
-    }
-
-    public List<PostoTrabalho> getPostos() {
-        return postos;
-    }
-
-    public void setPostos(List<PostoTrabalho> postos) {
-        this.postos = postos;
     }
 
     public List<Documentos> getDocumentos() {
@@ -174,14 +161,6 @@ public class Contrato {
     public Status getStatus() { return status; }
 
     public void setStatus(Status status) { this.status = status; }
-
-    public TipoContrato getTipoContrato() {
-        return tipoContrato;
-    }
-
-    public void setTipoContrato(TipoContrato tipoContrato) {
-        this.tipoContrato = tipoContrato;
-    }
 
     public String getResponsavel() { return responsavel; }
 

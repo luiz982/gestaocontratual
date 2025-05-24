@@ -2,6 +2,8 @@ package com.getinfo.gestaocontratual.controller.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import java.time.LocalDate;
 
 public record CreateContratanteRequest(
@@ -18,7 +20,6 @@ public record CreateContratanteRequest(
 
         String inscricaoMunicipal,
 
-        @Email(message = "E-mail corporativo inválido")
         String emailCorporativo,
 
         String site,
@@ -39,6 +40,10 @@ public record CreateContratanteRequest(
 
         String estado,
 
+        @Min(value = 0, message = "Tipo de empresa deve ser 0 (Privada) ou 1 (Pública)")
+        @Max(value = 1, message = "Tipo de empresa deve ser 0 (Privada) ou 1 (Pública)")
+        Integer tipoEmpresa,
+
         String banco,
 
         String agencia,
@@ -49,6 +54,5 @@ public record CreateContratanteRequest(
 
         String responsavelLegalTelefone,
 
-        @Email(message = "E-mail do responsável legal inválido")
         String responsavelLegalEmail
 ) {}
