@@ -19,7 +19,7 @@ public interface ContratoRepository  extends JpaRepository<Contrato, Long> {
     List<Contrato> findByStatus_NomeIgnoreCase(String nome);
     @Query("SELECT c FROM Contrato c WHERE LOWER(c.status.nome) <> 'arquivado'")
     List<Contrato> findAllAtivos();
-    @Query("SELECT MONTH(c.createdAt), COUNT(c) FROM Contrato c WHERE YEAR(c.createdAt) = :ano GROUP BY MONTH(c.createdAt)")
+    @Query("SELECT MONTH(c.dtInicio), COUNT(c) FROM Contrato c WHERE YEAR(c.dtInicio) = :ano GROUP BY MONTH(c.dtInicio)")
     List<Object[]> countContratosPorMes(@Param("ano") int ano);
 
     List<Contrato> findAll();
