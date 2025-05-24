@@ -15,12 +15,11 @@ public class ContratoDataTable {
     private Date dtAlteracao;
     private Integer idContratante;
     private String status;
-    private TipoContrato tipoContrato;
     private String tipoServico;
     private String responsavel;
     private Contratante contratante;
 
-    public ContratoDataTable(Long idContrato, Long numContrato, Date dtInicio, Date dtFim, Date dtAlteracao, Integer idContratante, String status, TipoContrato tipoContrato, String tipoServico, String responsavel, Contratante contratante) {
+    public ContratoDataTable(Long idContrato, Long numContrato, Date dtInicio, Date dtFim, Date dtAlteracao, Integer idContratante, String status, String tipoServico, String responsavel, Contratante contratante) {
         this.idContrato = idContrato;
         this.numContrato = numContrato;
         this.dtInicio = dtInicio;
@@ -28,7 +27,6 @@ public class ContratoDataTable {
         this.dtAlteracao = dtAlteracao;
         this.idContratante = idContratante;
         this.status = status;
-        this.tipoContrato = tipoContrato;
         this.tipoServico = tipoServico;
         this.responsavel = responsavel;
         this.contratante = contratante;
@@ -105,14 +103,6 @@ public class ContratoDataTable {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public TipoContrato getTipoContrato() {
-        return tipoContrato;
-    }
-
-    public void setTipoContrato(TipoContrato tipoContrato) {
-        this.tipoContrato = tipoContrato;
     }
 
     public String getTipoServico() {

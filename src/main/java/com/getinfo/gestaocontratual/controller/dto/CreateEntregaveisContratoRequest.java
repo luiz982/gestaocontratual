@@ -9,7 +9,7 @@ public record CreateEntregaveisContratoRequest(
                                                String nome,
                                                Date dtInicio,
                                                Date dtFim,
-                                               StatusEntregavel Status,
+                                               String Status,
                                                String descricao,
                                                List<EntregavelColaboradorRequest> colaboradores) {
 

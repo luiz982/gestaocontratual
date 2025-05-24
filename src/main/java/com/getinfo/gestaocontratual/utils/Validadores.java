@@ -58,6 +58,14 @@ public class Validadores {
         }
     }
 
+    public static boolean isEmailValido(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(emailRegex);
+    }
+
     public static boolean ValidarCEP(String cep) {
         if (cep == null || cep.isBlank()) {
             return false;
