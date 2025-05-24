@@ -84,8 +84,7 @@ public class ContratoController {
             }
             contrato.setColaboradores(colaboradoresSet);
         }
-
-        if (dto.entregaveis() != null) {
+        if (dto.entregaveis() != null && dto.entregaveis().toArray().length != 0) {
             List<Entregaveis> entregaveisList = new ArrayList<>();
             for (var e : dto.entregaveis()) {
                 if (e.nome() == null || e.nome().isBlank()) {
@@ -102,7 +101,17 @@ public class ContratoController {
                 entregavel.setNome(e.nome());
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
-                entregavel.setStatus(e.Status());
+                if (e.Status() != null && !e.Status().isBlank() && !e.Status().isEmpty()) {
+                    try {
+                        entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
+                    } catch (IllegalArgumentException ex) {
+                        return ResponseEntity.badRequest()
+                                .body("Erro: Status inválido para o entregável: " + e.nome());
+                    }
+                } else {
+                    return ResponseEntity.badRequest()
+                            .body("Erro: Status inválido para o entregável: " + e.nome());
+                }
                 entregavel.setDescricao(e.descricao());
                 entregavel.setIdContrato(contrato);
 
@@ -349,6 +358,13 @@ public class ContratoController {
         }
 
         if (dto.entregaveis() != null) {
+            if (dto.entregaveis() == null) {
+                System.out.println("Entregáveis é null");
+            } else if (dto.entregaveis().isEmpty()) {
+                System.out.println("Entregáveis está vazio");
+            } else {
+                System.out.println("Entregáveis tem: " + dto.entregaveis().size() + " elementos");
+            }
             List<Entregaveis> entregaveisList = new ArrayList<>();
             for (var e : dto.entregaveis()) {
                 if (e.nome() == null || e.nome().isBlank()) {
@@ -365,7 +381,18 @@ public class ContratoController {
                 entregavel.setNome(e.nome());
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
-                entregavel.setStatus(e.Status());
+                System.out.println("Status recebido: '" + e.Status() + "'");
+                if (e.Status() != null && !e.Status().isBlank() && !e.Status().isEmpty()) {
+                    try {
+                        entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
+                    } catch (IllegalArgumentException ex) {
+                        return ResponseEntity.badRequest()
+                                .body("Erro: Status inválido para o entregável: " + e.nome());
+                    }
+                } else {
+                    return ResponseEntity.badRequest()
+                            .body("Erro: Status inválido para o entregável: " + e.nome());
+                }
                 entregavel.setDescricao(e.descricao());
                 entregavel.setIdContrato(contrato);
 

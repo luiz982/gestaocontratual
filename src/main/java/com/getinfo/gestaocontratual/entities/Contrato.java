@@ -29,7 +29,7 @@ public class Contrato {
     @Temporal(TemporalType.DATE)
     private Date dtAlteracao;
 
-    @Column(nullable = false)
+    @Column
     private TipoContrato tipoContrato;
 
     @Column
