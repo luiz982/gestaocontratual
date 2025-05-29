@@ -107,7 +107,7 @@ public class EntregaveisController {
     
         return ResponseEntity.ok(listaEntregaveisDetalhe);
     }
-    
+
 
     @PostMapping("/criarEntregaveis")
     public ResponseEntity<String> CriarEntregaveis(@RequestBody CreateEntregaveisRequest dto) {
@@ -119,24 +119,23 @@ public class EntregaveisController {
 
         if (dto.nome() == null || dto.nome().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Nome do Entregavel não informado!");
+                    .body("Erro: Nome do Entregável não informado!");
         }
 
         if (dto.dtInicio() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Data de Inicio não informada!");
-        }           
-        
-        if (dto.dtInicio().after(dto.dtFim())) {
+                    .body("Erro: Data de Início não informada!");
+        }
+
+        if (dto.dtFim() != null && dto.dtInicio().after(dto.dtFim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro: Data de Inicio maior que a Data de Fim!");
+                    .body("Erro: Data de Início maior que a Data de Fim!");
         }
 
         Optional<Contrato> contratoOptional = contratoRepository.findById(dto.idContrato());
-
         if (contratoOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
-        }  
+        }
 
         Entregaveis entregaveis = new Entregaveis();
 
@@ -153,21 +152,82 @@ public class EntregaveisController {
                 relacao.setEntregavel(entregaveis);
                 relacao.setFuncaoEntregavel(c.funcaoEntregavel());
 
-                System.out.println("Colaborador: " + colaboradorOpt.get().getNome() + ", Função: " + c.funcaoEntregavel());
                 entregaveis.getColaboradores().add(relacao);
             }
         }
 
-        entregaveis.setIdContrato(contratoOptional.orElse(null));
+        entregaveis.setIdContrato(contratoOptional.get());
         entregaveis.setNome(dto.nome());
         entregaveis.setDtInicio(dto.dtInicio());
         entregaveis.setDtFim(dto.dtFim());
         entregaveis.setStatus(dto.Status());
+        entregaveis.setDescricao(dto.descricao());
 
-        EntregaveisRepository.save(entregaveis);        
+        EntregaveisRepository.save(entregaveis);
 
-        var msg = "Entregaveis criado com sucesso";
-        return ResponseEntity.ok(msg);
+        return ResponseEntity.ok("Entregável criado com sucesso");
+    }
+
+
+    @PutMapping("/atualizarEntregaveis/{id}")
+    @Transactional
+    public ResponseEntity<String> atualizarEntregaveis(@PathVariable Long id, @RequestBody CreateEntregaveisRequest dto) {
+
+        Optional<Entregaveis> entregaveisOptional = EntregaveisRepository.findById(id);
+        if (entregaveisOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Entregável não encontrado.");
+        }
+
+        if (dto.idContrato() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Numero do Contrato não informado!");
+        }
+
+        if (dto.nome() == null || dto.nome().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Nome do Entregável não informado!");
+        }
+
+        if (dto.dtInicio() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Data de Início não informada!");
+        }
+
+        if (dto.dtFim() != null && dto.dtInicio().after(dto.dtFim())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Data de Início maior que a Data de Fim!");
+        }
+
+        Optional<Contrato> contratoOptional = contratoRepository.findById(dto.idContrato());
+        if (contratoOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado");
+        }
+
+        Entregaveis entregaveis = entregaveisOptional.get();
+
+        entregaveis.setIdContrato(contratoOptional.get());
+        entregaveis.setNome(dto.nome());
+        entregaveis.setDtInicio(dto.dtInicio());
+        entregaveis.setDtFim(dto.dtFim());
+        entregaveis.setStatus(dto.Status());
+        entregaveis.setDescricao(dto.descricao());
+
+        entregaveis.getColaboradores().clear();
+
+        if (dto.colaboradores() != null && !dto.colaboradores().isEmpty()) {
+            for (EntregavelColaboradorRequest c : dto.colaboradores()) {
+                Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
+                if (colaboradorOpt.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
+                }
+                EntregaveisColaborador relacao = new EntregaveisColaborador();
+                relacao.setColaborador(colaboradorOpt.get());
+                relacao.setEntregavel(entregaveis);
+                relacao.setFuncaoEntregavel(c.funcaoEntregavel());
+
+                entregaveis.getColaboradores().add(relacao);
+            }
+        }
+
+        EntregaveisRepository.save(entregaveis);
+
+        return ResponseEntity.ok("Entregável atualizado com sucesso.");
     }
 
     @DeleteMapping("{id}")
