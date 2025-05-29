@@ -1,5 +1,6 @@
 package com.getinfo.gestaocontratual.controller;
 
+import com.getinfo.gestaocontratual.controller.dto.DocumentoResponse;
 import com.getinfo.gestaocontratual.entities.Contrato;
 import com.getinfo.gestaocontratual.entities.Documentos;
 import com.getinfo.gestaocontratual.repository.ContratoRepository;
@@ -116,9 +117,14 @@ public class DocumentoController {
 
     @Operation(summary = "Listar todos os documentos de um contrato")
     @GetMapping("/{idContrato}")
-    public ResponseEntity<List<Documentos>> listarDocumentosPorContrato(@PathVariable Long idContrato) {
+    public ResponseEntity<List<DocumentoResponse>> listarDocumentosPorContrato(@PathVariable Long idContrato) {
         List<Documentos> documentos = documentoRepository.findByContratoId(idContrato);
-        return ResponseEntity.ok(documentos);
+
+        List<DocumentoResponse> response = documentos.stream()
+                .map(doc -> new DocumentoResponse(doc.getIdDocumento(), doc.getNome(), doc.getUrl()))
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 }
 
