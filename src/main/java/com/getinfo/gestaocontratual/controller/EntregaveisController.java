@@ -1,9 +1,6 @@
 package com.getinfo.gestaocontratual.controller;
 
-import com.getinfo.gestaocontratual.controller.dto.ColaboradorResponse;
-import com.getinfo.gestaocontratual.controller.dto.CreateEntregaveisRequest;
-import com.getinfo.gestaocontratual.controller.dto.EntregaveisResponse;
-import com.getinfo.gestaocontratual.controller.dto.EntregavelColaboradorRequest;
+import com.getinfo.gestaocontratual.controller.dto.*;
 import com.getinfo.gestaocontratual.entities.*;
 import com.getinfo.gestaocontratual.repository.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,13 +36,34 @@ public class EntregaveisController {
         this.colaboradorRepository = colaboradorRepository;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Entregaveis>> Entregaveis(){
-        var Entregaveis = EntregaveisRepository.findAll();
-
-        return ResponseEntity.ok(Entregaveis);
-
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ResponseEntregaveisFindAll>> getEntregaveis() {
+//        List<Entregaveis> entregaveisList = entregaveisRepository.findAll();
+//
+//        List<ResponseEntregaveisFindAll> responseList = entregaveisList.stream()
+//                .map(entregavel -> new ResponseEntregaveisFindAll(
+//                        entregavel.getIdEntregavel(),
+//                        entregavel.getIdContrato() != null ? entregavel.getIdContrato().getIdContrato() : null,
+//                        entregavel.getNome(),
+//                        entregavel.getDtInicio(),
+//                        entregavel.getDtFim(),
+//                        entregavel.getStatus(),
+//                        entregavel.getDescricao(),
+//                        entregavel.getColaboradores().stream()
+//                                .map(ec -> new ColaboradorResponse(
+//                                        ec.getColaborador().getId(),
+//                                        ec.getColaborador().getCpf(),
+//                                        ec.getColaborador().getNome(),
+//                                        ec.getColaborador().getCargo(),
+//                                        ec.getColaborador().isSituacao(),
+//                                        rel.getFuncaoEntregavel()
+//                                ))
+//                                .toList()
+//                ))
+//                .toList();
+//
+//        return ResponseEntity.ok(responseList);
+//    }
 
     @Operation(summary = "Retorna todos os entregáveis de um contrato")
     @GetMapping("/contrato/{idContrato}")
@@ -65,8 +83,8 @@ public class EntregaveisController {
                                 Colaborador c = rel.getColaborador();
                                 return new ColaboradorResponse(
                                         c.getId(),
-                                        c.getNome(),
                                         c.getCpf(),
+                                        c.getNome(),
                                         c.getCargo(),
                                         c.isSituacao(),
                                         rel.getFuncaoEntregavel()

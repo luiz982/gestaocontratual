@@ -8,6 +8,7 @@ import com.getinfo.gestaocontratual.entities.ContratoColaborador;
 import com.getinfo.gestaocontratual.repository.ColaboradorRepository;
 import com.getinfo.gestaocontratual.repository.ContratoColaboradorRepository;
 import com.getinfo.gestaocontratual.repository.ContratoRepository;
+import com.getinfo.gestaocontratual.utils.Validadores;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
@@ -53,9 +54,15 @@ public class ColaboradorController {
     @PostMapping
     @Transactional
     public ResponseEntity<?> criar(@RequestBody CreateColaboradorRequest request) {
+        if (!Validadores.isCpfValido(request.cpf())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("CPF inválido.");
+        }
+
         if (colaboradorRepository.existsByCpf(request.cpf())) {
             return ResponseEntity
-                    .status(404)
+                    .status(409)
                     .body("Já existe um colaborador com esse CPF.");
         }
 
@@ -72,6 +79,12 @@ public class ColaboradorController {
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody CreateColaboradorRequest request) {
+        if (!Validadores.isCpfValido(request.cpf())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("CPF inválido.");
+        }
+
         Optional<Colaborador> optional = colaboradorRepository.findById(id);
         if (optional.isEmpty()) {
             return ResponseEntity.status(404).body("Colaborador não encontrado.");
