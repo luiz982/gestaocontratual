@@ -9,6 +9,7 @@ public record CreateEntregaveisRequest(Long idContrato,
                                 Date dtInicio, 
                                 Date dtFim, 
                                 StatusEntregavel Status,
-                                List<EntregavelColaboradorRequest> colaboradores) {
+                                List<EntregavelColaboradorRequest> colaboradores,
+                                String descricao) {
     
 }
