@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.getinfo.gestaocontratual.utils.Validadores.sanitizeFileName;
+
 @Tag(name = "Documentos", description = "Gerenciamento de documentos")
 @RestController
 @RequestMapping("/documentos")
@@ -38,7 +40,11 @@ public class DocumentoController {
     @Operation(summary = "Cadastro de documentos")
     @Transactional
     @PostMapping("/criarDocumento")
-    public ResponseEntity<?> criarDocumento(@RequestPart("documento") MultipartFile file, @RequestParam("nome") String nome, @RequestParam("idContrato") Long idContrato) {
+    public ResponseEntity<?> criarDocumento(
+            @RequestPart("documento") MultipartFile file,
+            @RequestParam("nome") String nome,
+            @RequestParam("idContrato") Long idContrato) {
+
         Optional<Contrato> contratoOptional = contratoRepository.findById(idContrato);
 
         if (contratoOptional.isEmpty()) {
@@ -46,7 +52,8 @@ public class DocumentoController {
                     .body("Erro: Contrato não encontrado com o ID informado.");
         }
 
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        String sanitizedOriginalFileName = sanitizeFileName(file.getOriginalFilename());
+        String fileName = UUID.randomUUID().toString() + "_" + sanitizedOriginalFileName;
 
         try {
             documentoService.uploadFile(fileName, file);
@@ -55,12 +62,13 @@ public class DocumentoController {
                     .body("Erro ao fazer upload do arquivo para o Supabase Storage: " + e.getMessage());
         }
 
-        String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/" + "documentos/" + fileName;
+        String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/documentos/" + fileName;
 
         Documentos documento = new Documentos();
         documento.setContrato(contratoOptional.orElse(null));
-        documento.setNome(nome);
+        documento.setNome(sanitizeFileName(nome));
         documento.setUrl(fileUrl);
+
         Documentos salvo = documentoRepository.save(documento);
         return ResponseEntity.ok(salvo);
     }
@@ -68,7 +76,11 @@ public class DocumentoController {
     @Operation(summary = "Alterar documento")
     @Transactional
     @PutMapping("/{id}")
-    public ResponseEntity<?> alterarDocumento(@PathVariable Long id, @RequestPart(value = "documento", required = false) MultipartFile file, @RequestPart("nome") String nome) {
+    public ResponseEntity<?> alterarDocumento(
+            @PathVariable Long id,
+            @RequestPart(value = "documento", required = false) MultipartFile file,
+            @RequestPart("nome") String nome) {
+
         Optional<Documentos> documentoOptional = documentoRepository.findById(id);
 
         if (documentoOptional.isEmpty()) {
@@ -80,22 +92,24 @@ public class DocumentoController {
         String fileUrl = documento.getUrl();
 
         if (file != null && !file.isEmpty()) {
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String sanitizedOriginalFileName = sanitizeFileName(file.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString() + "_" + sanitizedOriginalFileName;
 
             try {
                 documentoService.uploadFile(fileName, file);
 
                 documentoService.deleteFile(fileUrl.substring(fileUrl.lastIndexOf('/') + 1));
 
-                fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/" + "documentos/" + fileName;
+                fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/documentos/" + fileName;
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Erro ao fazer upload do arquivo para o Supabase Storage: " + e.getMessage());
             }
         }
 
-        documento.setNome(nome);
+        documento.setNome(sanitizeFileName(nome));
         documento.setUrl(fileUrl);
+
         Documentos salvo = documentoRepository.save(documento);
         return ResponseEntity.ok(salvo);
     }

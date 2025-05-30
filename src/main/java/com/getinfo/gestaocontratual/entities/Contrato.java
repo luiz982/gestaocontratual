@@ -44,14 +44,6 @@ public class Contrato {
     @Column(nullable = false)
     private String responsavel;
 
-    @ManyToMany
-    @JoinTable(
-            name = "contrato_colaborador",
-            joinColumns = @JoinColumn(name = "id_contrato"),
-            inverseJoinColumns = @JoinColumn(name = "id_colaborador")
-    )
-    private Set<Colaborador> colaboradores = new HashSet<>();
-
     @OneToMany(mappedBy = "idContrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Entregaveis> entregaveis;
 
@@ -72,14 +64,6 @@ public class Contrato {
 
     public void setContratoColaboradores(List<ContratoColaborador> contratoColaboradores) {
         this.contratoColaboradores = contratoColaboradores;
-    }
-
-    public Set<Colaborador> getColaboradores() {
-        return colaboradores;
-    }
-
-    public void setColaboradores(Set<Colaborador> colaboradores) {
-        this.colaboradores = colaboradores;
     }
 
     public List<Entregaveis> getEntregaveis() {
