@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.getinfo.gestaocontratual.utils.Validadores.sanitizeFileName;
+
 @Tag(name = "Contratos", description = "Gerenciamento de contratos")
 @RestController
 @RequestMapping("/contratos")
@@ -39,8 +41,9 @@ public class ContratoController {
     @Operation(summary = "Cadastro de contrato")
     @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "/criarContrato", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> criarContrato(@RequestPart("contrato") CreateContratoRequest dto,
-                                                @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
+    public ResponseEntity<String> criarContrato(
+            @RequestPart("contrato") CreateContratoRequest dto,
+            @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
@@ -52,7 +55,6 @@ public class ContratoController {
         }
 
         Status status = statusRepository.findByNomeIgnoreCase("Ativo");
-
         if (status == null) {
             status = new Status();
             status.setNome("Ativo");
@@ -69,17 +71,28 @@ public class ContratoController {
         contrato.setStatus(status);
         contrato.setTipoServico(dto.tipoServico());
 
+
+        System.out.println(dto.colaboradores());
         if (dto.colaboradores() != null) {
-            Set<Colaborador> colaboradoresSet = new HashSet<>();
+            List<ContratoColaborador> contratoColaboradores = new ArrayList<>();
+
             for (var c : dto.colaboradores()) {
                 Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
                 if (colaboradorOpt.isEmpty()) {
                     return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
                 }
-                colaboradoresSet.add(colaboradorOpt.get());
+
+                ContratoColaborador relacao = new ContratoColaborador();
+                relacao.setContrato(contrato);
+                relacao.setColaborador(colaboradorOpt.get());
+                relacao.setFuncaoContrato(c.funcaoContrato());
+
+                contratoColaboradores.add(relacao);
             }
-            contrato.setColaboradores(colaboradoresSet);
+
+            contrato.setContratoColaboradores(contratoColaboradores);
         }
+
         if (dto.entregaveis() != null && dto.entregaveis().toArray().length != 0) {
             List<Entregaveis> entregaveisList = new ArrayList<>();
             for (var e : dto.entregaveis()) {
@@ -97,6 +110,7 @@ public class ContratoController {
                 entregavel.setNome(e.nome());
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
+
                 if (e.Status() != null && !e.Status().isBlank() && !e.Status().isEmpty()) {
                     try {
                         entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
@@ -108,6 +122,7 @@ public class ContratoController {
                     return ResponseEntity.badRequest()
                             .body("Erro: Status inválido para o entregável: " + e.nome());
                 }
+
                 entregavel.setDescricao(e.descricao());
                 entregavel.setIdContrato(contrato);
 
@@ -137,13 +152,15 @@ public class ContratoController {
             List<Documentos> documentosList = new ArrayList<>();
             for (MultipartFile file : documentos) {
                 if (file != null && !file.isEmpty()) {
-                    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                    String sanitizedOriginalFileName = sanitizeFileName(file.getOriginalFilename());
+                    String fileName = UUID.randomUUID().toString() + "_" + sanitizedOriginalFileName;
+
                     try {
                         documentoService.uploadFile(fileName, file);
                         String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/documentos/" + fileName;
 
                         Documentos documento = new Documentos();
-                        documento.setNome(file.getOriginalFilename());
+                        documento.setNome(sanitizeFileName(file.getOriginalFilename()));
                         documento.setUrl(fileUrl);
                         documento.setContrato(contrato);
 
@@ -288,21 +305,27 @@ public class ContratoController {
                                                     @RequestPart(value = "documentos", required = false) MultipartFile[] documentos) {
         Optional<Contrato> contratoOpt = contratoRepository.findById(id);
         if (contratoOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contrato não encontrado para ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro: Contrato não encontrado para ID: " + id);
         }
 
         Contrato contrato = contratoOpt.get();
 
         Contratante contratante = contratanteRepository.findById(dto.idContratante()).orElse(null);
         if (contratante == null) {
-            return ResponseEntity.badRequest().body("Erro: Contratante não encontrado!");
+            return ResponseEntity.badRequest().body("Erro: Contratante não encontrado para ID: " + dto.idContratante());
         }
 
-        if (dto.dtInicio() == null || dto.dtInicio().toString().isBlank()) {
-            return ResponseEntity.badRequest().body("Erro: A data de início não pode ser vazia.");
+        if (dto.dtInicio() == null) {
+            return ResponseEntity.badRequest().body("Erro: A data de início não pode ser nula.");
         }
 
-        Status status = dto.idStatus() != null ? statusRepository.findById(dto.idStatus()).orElse(null) : null;
+        Status status = null;
+        if (dto.idStatus() != null) {
+            status = statusRepository.findById(dto.idStatus()).orElse(null);
+            if (status == null) {
+                return ResponseEntity.badRequest().body("Erro: Status não encontrado para ID: " + dto.idStatus());
+            }
+        }
 
         contrato.setNumContrato(dto.numContrato());
         contrato.setDtInicio(dto.dtInicio());
@@ -317,7 +340,7 @@ public class ContratoController {
             for (var c : dto.colaboradores()) {
                 Optional<Colaborador> colaboradorOpt = colaboradorRepository.findById(c.id());
                 if (colaboradorOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Colaborador com ID " + c.id() + " não encontrado.");
+                    return ResponseEntity.badRequest().body("Erro: Colaborador com ID " + c.id() + " não encontrado.");
                 }
                 ContratoColaborador relacao = new ContratoColaborador();
                 relacao.setColaborador(colaboradorOpt.get());
@@ -337,7 +360,7 @@ public class ContratoController {
                     return ResponseEntity.badRequest().body("Erro: Data de início do entregável é obrigatória.");
                 }
                 if (e.dtFim() != null && e.dtInicio().after(e.dtFim())) {
-                    return ResponseEntity.badRequest().body("Erro: Data de início maior que fim no entregável: " + e.nome());
+                    return ResponseEntity.badRequest().body("Erro: Data de início maior que a data de fim no entregável: " + e.nome());
                 }
 
                 Entregaveis entregavel = new Entregaveis();
@@ -347,10 +370,14 @@ public class ContratoController {
                 entregavel.setDtFim(e.dtFim());
                 entregavel.setDescricao(e.descricao());
 
-                try {
-                    entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
-                } catch (IllegalArgumentException ex) {
-                    return ResponseEntity.badRequest().body("Status inválido para entregável: " + e.nome());
+                if (e.Status() != null && !e.Status().isBlank()) {
+                    try {
+                        entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
+                    } catch (IllegalArgumentException ex) {
+                        return ResponseEntity.badRequest().body("Erro: Status inválido para o entregável: " + e.nome());
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body("Erro: Status é obrigatório para o entregável: " + e.nome());
                 }
 
                 List<EntregaveisColaborador> relacoes = new ArrayList<>();
@@ -358,7 +385,7 @@ public class ContratoController {
                     for (var c : e.colaboradores()) {
                         Optional<Colaborador> colabOpt = colaboradorRepository.findById(c.id());
                         if (colabOpt.isEmpty()) {
-                            return ResponseEntity.badRequest().body("Colaborador ID " + c.id() + " não encontrado no entregável " + e.nome());
+                            return ResponseEntity.badRequest().body("Erro: Colaborador com ID " + c.id() + " não encontrado no entregável: " + e.nome());
                         }
                         EntregaveisColaborador relacao = new EntregaveisColaborador();
                         relacao.setColaborador(colabOpt.get());
@@ -374,27 +401,36 @@ public class ContratoController {
         }
 
         contrato.getDocumentos().clear();
+
         if (documentos != null && documentos.length > 0) {
             for (MultipartFile file : documentos) {
-                if (!file.isEmpty()) {
-                    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                if (file != null && !file.isEmpty()) {
                     try {
+                        String cleanOriginalName = sanitizeFileName(file.getOriginalFilename());
+                        String fileName = UUID.randomUUID().toString() + "_" + cleanOriginalName;
                         documentoService.uploadFile(fileName, file);
                         String fileUrl = "https://dczwhcefblmnjnhhpvzn.supabase.co/storage/v1/object/public/documentos/" + fileName;
 
                         Documentos doc = new Documentos();
-                        doc.setNome(file.getOriginalFilename());
+                        doc.setNome(cleanOriginalName);
                         doc.setUrl(fileUrl);
                         doc.setContrato(contrato);
+
                         contrato.getDocumentos().add(doc);
                     } catch (IOException e) {
-                        throw new RuntimeException("Erro ao fazer upload do documento: " + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Erro ao fazer upload do documento: " + e.getMessage());
                     }
                 }
             }
         }
 
-        contratoRepository.save(contrato);
+        try {
+            contratoRepository.save(contrato);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao atualizar o contrato: " + e.getMessage());
+        }
 
         return ResponseEntity.ok("Contrato atualizado com sucesso. ID: " + contrato.getIdContrato());
     }

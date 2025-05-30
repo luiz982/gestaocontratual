@@ -1,4 +1,5 @@
 package com.getinfo.gestaocontratual.utils;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -21,6 +22,12 @@ public class Validadores {
         } catch (InvalidStateException e) {
             return false;
         }
+    }
+
+    public static String sanitizeFileName(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        return normalized.replaceAll("[^a-zA-Z0-9._-]", "");
     }
 
     public static boolean isCpfValido(String cpf) {
