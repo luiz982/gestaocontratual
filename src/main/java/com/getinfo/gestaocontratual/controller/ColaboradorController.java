@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,8 +108,17 @@ public class ColaboradorController {
         if (!colaboradorRepository.existsById(id)) {
             return ResponseEntity.status(404).body("Colaborador não encontrado.");
         }
-        colaboradorRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+
+        try {
+            colaboradorRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Não é possível excluir: o colaborador está vinculado a um contrato ou entregável.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao excluir colaborador: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Lista colaboradores por ID do contrato")
