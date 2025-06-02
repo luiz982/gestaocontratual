@@ -63,7 +63,6 @@ public class ContratoController {
         }
 
         Contrato contrato = new Contrato();
-        contrato.setNumContrato(dto.numContrato());
         contrato.setDtFim(dto.dtFim());
         contrato.setDtInicio(dto.dtInicio());
         contrato.setIdContratante(contratante);
@@ -175,6 +174,8 @@ public class ContratoController {
         }
 
         try {
+            contratoRepository.save(contrato);
+            contrato.setNumContrato(contrato.getIdContrato());
             contratoRepository.save(contrato);
         } catch (Exception e) {
             if (contrato.getDocumentos() != null) {
@@ -327,7 +328,6 @@ public class ContratoController {
             }
         }
 
-        contrato.setNumContrato(dto.numContrato());
         contrato.setDtInicio(dto.dtInicio());
         contrato.setDtFim(dto.dtFim());
         contrato.setResponsavel(dto.responsavel());
@@ -426,6 +426,8 @@ public class ContratoController {
         }
 
         try {
+            contratoRepository.save(contrato);
+            contrato.setNumContrato(contrato.getIdContrato());
             contratoRepository.save(contrato);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
