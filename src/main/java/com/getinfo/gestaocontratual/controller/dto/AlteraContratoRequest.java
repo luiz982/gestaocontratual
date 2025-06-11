@@ -12,7 +12,7 @@ public record AlteraContratoRequest(
         Date dtInicio,
         @JsonFormat(pattern = "yyyy-MM-dd")
         Date dtFim,
-        Long idStatus,
+        String status,
         String tipoServico,
         Long idContratante,
         String responsavel,

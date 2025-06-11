@@ -320,12 +320,19 @@ public class ContratoController {
             return ResponseEntity.badRequest().body("Erro: A data de início não pode ser nula.");
         }
 
-        Status status = null;
-        if (dto.idStatus() != null) {
-            status = statusRepository.findById(dto.idStatus()).orElse(null);
+        Status status;
+        String nomeStatus = dto.status();
+
+        if (nomeStatus != null && !nomeStatus.isBlank()) {
+            status = statusRepository.findByNomeIgnoreCase(nomeStatus);
+
             if (status == null) {
-                return ResponseEntity.badRequest().body("Erro: Status não encontrado para ID: " + dto.idStatus());
+                return ResponseEntity.badRequest()
+                        .body("Erro: Status com nome '" + nomeStatus + "' não encontrado!");
             }
+        } else {
+            return ResponseEntity.badRequest()
+                    .body("Erro: Status do contrato não pode ser nulo ou vazio!");
         }
 
         contrato.setDtInicio(dto.dtInicio());
@@ -369,7 +376,7 @@ public class ContratoController {
                 entregavel.setDtInicio(e.dtInicio());
                 entregavel.setDtFim(e.dtFim());
                 entregavel.setDescricao(e.descricao());
-
+                System.out.println(e.Status());
                 if (e.Status() != null && !e.Status().isBlank()) {
                     try {
                         entregavel.setStatus(StatusEntregavel.valueOf(e.Status()));
