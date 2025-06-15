@@ -14,14 +14,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                                "http://localhost:3000",
-                                "https://getinfo-gestao-de-contratos-ltna.vercel.app",
-                                "https://getinfo-gestao-de-contratos-6jebjwk87.vercel.app"
-                        )
-                        .allowedMethods("*")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedOriginPatterns("*") // Libera para todas as origens
+                        .allowedMethods("*")         // Libera todos os métodos HTTP (GET, POST, etc)
+                        .allowedHeaders("*")         // Libera todos os cabeçalhos
+                        .allowCredentials(true);     // Permite envio de cookies/autenticação
             }
         };
     }
