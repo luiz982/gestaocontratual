@@ -16,7 +16,8 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:3000",
-                                "https://getinfo-gestao-de-contratos-ltna.vercel.app"
+                                "https://getinfo-gestao-de-contratos-ltna.vercel.app",
+                                "https://getinfo-gestao-de-contratos-6jebjwk87.vercel.app"
                         )
                         .allowedMethods("*")
                         .allowedHeaders("*")
